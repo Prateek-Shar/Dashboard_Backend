@@ -10,6 +10,6 @@
 
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node ./DB/server.js"
   }
 }

@@ -1,16 +1,13 @@
 import mongoose from "mongoose"
 
-const uri = "mongodb+srv://Prateek:OlRw9NVC1zG4rNOa@clusterone.jxcodtj.mongodb.net/Dashboard?retryWrites=true&w=majority&appName=ClusterOne";
+const uri = process.env.MONGO_URI
 
 const Connect = async () => {
-    try {
-        await mongoose.connect(uri)
-        console.log("DB connected successfully")
-    }
 
-    catch(error) {
-        console.log("Error" , error);
-    }
+    await mongoose.connect(uri)
+    .then(() => console.log("DB connected successfully"))
+    .catch(() => console.error("Somethign broke while connecting to db"))
+
 }
 
 export default Connect;

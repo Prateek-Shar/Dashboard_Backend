@@ -28,7 +28,7 @@ app.use(cookieParser());
 
 // Server Set Up Route - 
 app.listen(/* port */  async () => {
-  await Connect();
+  // await Connect();
   // console.log(`Server running at http://localhost:${port}`);
 });
 
@@ -71,6 +71,9 @@ app.post("/newUser", async (req, res) => {
 
 // Login Routes
 app.post("/UserCheck", async (req, res) => {
+
+  await Connect();
+  
   try {
     const { Username, Password } = req.body;
     console.log("Login attempt with:", req.body);

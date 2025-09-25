@@ -19,8 +19,14 @@ const PORT = process.env.PORT
 app.use(express.json());  
 app.use(express.urlencoded({ extended: true })); 
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://insightboard.vercel.app",
+  "https://dashboard-backend-1-0w4b.onrender.com"
+];
+
 app.use(cors({
-  origin : ["http://localhost:5173" , "https://insightboard.vercel.app" , "https://dashboard-backend-1-0w4b.onrender.com"],
+  origin : allowedOrigins,
   credentials : true,
 }));
 app.use(cookieParser());

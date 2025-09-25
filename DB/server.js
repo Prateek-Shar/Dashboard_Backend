@@ -95,6 +95,7 @@ app.post("/UserCheck", async (req, res) => {
     console.log("User authenticated:", userDoc.Username);
 
     const SessionID = uuidv4();
+    console.log("Session ID : " , SessionID)
     
 
     // Insert the session

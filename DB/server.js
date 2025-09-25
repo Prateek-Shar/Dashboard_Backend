@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid';
 import getSessionInfo from "../MiddleWare/auth.js"
 import Session from "./schema/session.js"
-// import dotenv from "dotenv"
+import dotenv from "dotenv"
 
 
 // For Local Deploy

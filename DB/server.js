@@ -13,13 +13,13 @@ import Session from "./schema/session.js"
 
 
 const app = express()
-const port = 8080;
+// const port = 8080;
 
 app.use(express.json());  
 app.use(express.urlencoded({ extended: true })); 
 
 app.use(cors({
-  origin : ["http://localhost:5173" , "https://insightboard.vercel.app"],
+  origin : ["http://localhost:5173" , process.env.PRODUCTION_API],
   credentials : true,
 }));
 app.use(cookieParser());
@@ -27,9 +27,9 @@ app.use(cookieParser());
 
 
 // Server Set Up Route - 
-app.listen(port, async () => {
+app.listen(/* port */  async () => {
   await Connect();
-  console.log(`Server running at http://localhost:${port}`);
+  // console.log(`Server running at http://localhost:${port}`);
 });
 
 

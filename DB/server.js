@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
 app.use(cors({
-  origin : ["http://localhost:5173" , "https://insightboard.vercel.app" , "https://your-backend.onrender.com" ],
+  origin : ["http://localhost:5173" , "https://insightboard.vercel.app" ],
   credentials : true,
 }));
 app.use(cookieParser());
@@ -122,7 +122,6 @@ app.post("/UserCheck", async (req, res) => {
 
 
     
-
     return res.status(200).json({
       message: "Login successful",
       login_det: {

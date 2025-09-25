@@ -10,7 +10,6 @@ import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid';
 import getSessionInfo from "../MiddleWare/auth.js"
 import Session from "./schema/session.js"
-import { connect } from "mongoose"
 
 
 const app = express()
@@ -27,16 +26,10 @@ app.use(cookieParser());
 
 
 
-// // Server Set Up Route - 
-// app.listen(port  , async () => {
-//   await Connect();
-//   console.log(`Server running at http://localhost:${port}`);
-// });
-
 
 const startServer = async() => {
   try {
-    connect();
+    Connect();
     app.listen(PORT , () => {
       console.log(`Server runnig on ${PRODUCTION_API}:${PORT}`)
     })

@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
 app.use(cors({
-  origin : ["http://localhost:5173" , "https://insightboard.vercel.app" ],
+  origin : ["http://localhost:5173" , "https://insightboard.vercel.app" , "https://your-backend.onrender.com/check-auth" ],
   credentials : true,
 }));
 app.use(cookieParser());
@@ -76,7 +76,7 @@ app.post("/newUser", async (req, res) => {
 
 });
 
-app.get("/api/check-auth", (req, res) => {
+app.get("/check-auth", (req, res) => {
   if (req.session?.user) {
     res.sendStatus(200);
   } else {

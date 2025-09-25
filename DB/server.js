@@ -14,9 +14,7 @@ import dotenv from "dotenv"
 
 dotenv.config()
 
-
 const app = express()
-const PORT = process.env.PORT;
 
 app.use(express.json());  
 app.use(express.urlencoded({ extended: true })); 
@@ -29,12 +27,15 @@ app.use(cookieParser());
 
 
 
+const PRODUCTION=process.env.PRODUCTION_API
+const PORT=process.env.PORT
+
 
 const startServer = async() => {
   try {
     Connect();
     app.listen(PORT , () => {
-      console.log(`Server runnig on ${PRODUCTION_API}:${PORT}`)
+      console.log(`Server runnig on ${PRODUCTION}:${PORT}`)
     })
   }
 

@@ -106,9 +106,16 @@ app.post("/UserCheck", async (req, res) => {
     // Set session cookie
     res.cookie("SessionID", SessionID, {
       maxAge: 10 * 60 * 1000, // 10 minutes
-      sameSite: "Lax"
+      sameSite: "Lax",
+      httpOnly: true,
+      secure: true,        // required for SameSite=None
+      sameSite: "None",    // allow cross-site cookie
+      domain: ".vercel.app", // optional, ensures frontend can access it
+      path: "/",
     });
 
+
+    
 
     return res.status(200).json({
       message: "Login successful",

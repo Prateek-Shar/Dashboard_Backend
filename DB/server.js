@@ -16,9 +16,6 @@ import Session from "./schema/session.js"
 dotenv.config()
 const PRODUCTION_API=process.env.PRODUCTION
 
-// const PORT=process.env.PORT
-
-
 const app = express()
 
 app.use(express.json());  

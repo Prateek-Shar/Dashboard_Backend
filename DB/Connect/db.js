@@ -2,12 +2,12 @@ import mongoose from "mongoose"
 import dotenv from "dotenv"
 
 // For Local Deployemnt
-// dotenv.config()
-// const uri = process.env.MONGO_URI
+dotenv.config()
+const uri = process.env.MONGO_URI
 
 const Connect = async () => {
     try {
-        await mongoose.connect(MONGO_URI)
+        await mongoose.connect(uri)
         console.log("DB Connected Successfully")
     }
 

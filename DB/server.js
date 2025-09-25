@@ -10,10 +10,11 @@ import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid';
 import getSessionInfo from "../MiddleWare/auth.js"
 import Session from "./schema/session.js"
+import { connect } from "mongoose"
 
 
 const app = express()
-// const port = 8080;
+const PORT = process.env.PORT;
 
 app.use(express.json());  
 app.use(express.urlencoded({ extended: true })); 
@@ -26,12 +27,27 @@ app.use(cookieParser());
 
 
 
-// Server Set Up Route - 
-app.listen(/* port */  async () => {
-  // await Connect();
-  // console.log(`Server running at http://localhost:${port}`);
-});
+// // Server Set Up Route - 
+// app.listen(port  , async () => {
+//   await Connect();
+//   console.log(`Server running at http://localhost:${port}`);
+// });
 
+
+const startServer = async() => {
+  try {
+    connect();
+    app.listen(PORT , () => {
+      console.log(`Server runnig on ${PRODUCTION_API}:${PORT}`)
+    })
+  }
+
+  catch(error) {
+    console.log("Something Broke on server side")
+  }
+}
+
+startServer();
 
 
 
@@ -72,8 +88,6 @@ app.post("/newUser", async (req, res) => {
 // Login Routes
 app.post("/UserCheck", async (req, res) => {
 
-  await Connect();
-  
   try {
     const { Username, Password } = req.body;
     console.log("Login attempt with:", req.body);

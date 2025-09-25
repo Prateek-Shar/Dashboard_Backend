@@ -26,9 +26,17 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin : allowedOrigins,
-  credentials : true,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow non-browser requests (like curl, Postman)
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
 }));
+
 app.use(cookieParser());
 
 
@@ -121,6 +129,7 @@ app.post("/UserCheck", async (req, res) => {
     // Set session cookie
     res.cookie("SessionID", SessionID, {
       maxAge: 10 * 60 * 1000, // 10 minutes
+      httpOnly : true,
       secure: true,        // required for SameSite=None
       sameSite: "None",    // allow cross-site cookie
       path: "/",

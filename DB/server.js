@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
 app.use(cors({
-  origin : ["http://localhost:5173" , "https://insightboard.vercel.app" , "https://your-backend.onrender.com/check-auth" ],
+  origin : ["http://localhost:5173" , "https://insightboard.vercel.app" , "https://your-backend.onrender.com" ],
   credentials : true,
 }));
 app.use(cookieParser());

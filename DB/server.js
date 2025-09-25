@@ -13,8 +13,9 @@ import Session from "./schema/session.js"
 
 
 // For Local Deploy
-// dotenv.config()
-// const PRODUCTION=process.env.PRODUCTION_API
+dotenv.config()
+const PRODUCTION_API=process.env.PRODUCTION
+
 // const PORT=process.env.PORT
 
 
@@ -24,7 +25,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
 app.use(cors({
-  origin : ["http://localhost:5173" , process.env.PRODUCTION],
+  origin : ["http://localhost:5173" , PRODUCTION_API],
   credentials : true,
 }));
 app.use(cookieParser());

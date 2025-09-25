@@ -15,6 +15,7 @@ import Session from "./schema/session.js"
 // For Local Deploy
 dotenv.config()
 const LOCAL_API=process.env.LOCAL
+const PORT=process.env.PORT
 
 const app = express()
 
@@ -22,7 +23,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
 app.use(cors({
-  origin : ["http://localhost:5173" , LOCAL_API],
+  origin : ["http://localhost:5173" , `${LOCAL_API}:${PORT}`],
   credentials : true,
 }));
 app.use(cookieParser());

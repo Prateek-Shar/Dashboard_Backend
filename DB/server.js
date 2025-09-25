@@ -5,11 +5,14 @@ import Product from "./schema/products.js"
 import Income from "./schema/income.js"
 import User from "./schema/users.js"
 import cors from "cors"
-import { setUser } from "../MiddleWare/sessions.js"
 import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid';
 import getSessionInfo from "../MiddleWare/auth.js"
 import Session from "./schema/session.js"
+import dotenv from "dotenv"
+
+
+dotenv.config()
 
 
 const app = express()

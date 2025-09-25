@@ -9,12 +9,7 @@ import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid';
 import getSessionInfo from "../MiddleWare/auth.js"
 import Session from "./schema/session.js"
-import dotenv from "dotenv"
 
-
-// For Local Deploy
-dotenv.config()
-const LOCAL_API=process.env.LOCAL
 
 const app = express()
 
@@ -22,7 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 
 app.use(cors({
-  origin : ["http://localhost:5173" , LOCAL_API ],
+  origin : ["http://localhost:5173" , "https://insightboard.vercel.app" ],
   credentials : true,
 }));
 app.use(cookieParser());

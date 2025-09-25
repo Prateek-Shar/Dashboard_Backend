@@ -1,4 +1,7 @@
 import mongoose from "mongoose"
+import dotnet from "dotenv"
+
+dotnet.config()
 
 const uri = process.env.MONGO_URI
 

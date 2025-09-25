@@ -9,9 +9,12 @@ import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid';
 import getSessionInfo from "../MiddleWare/auth.js"
 import Session from "./schema/session.js"
-
+import dotenv from "dotenv"
 
 const app = express()
+dotenv.config()
+
+const PORT = process.env.PORT
 
 app.use(express.json());  
 app.use(express.urlencoded({ extended: true })); 
@@ -23,6 +26,9 @@ app.use(cors({
 app.use(cookieParser());
 
 
+app.listen(PORT , () => {
+  console.log(`Server running on https://dashboard-backend-1-0w4b.onrender.com:${PORT}`)
+})
 
 const startServer = async() => {
   try {

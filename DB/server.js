@@ -76,6 +76,14 @@ app.post("/newUser", async (req, res) => {
 
 });
 
+app.get("/api/check-auth", (req, res) => {
+  if (req.session?.user) {
+    res.sendStatus(200);
+  } else {
+    res.sendStatus(401);
+  }
+});
+
 
 
 // Login Routes

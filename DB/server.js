@@ -9,10 +9,14 @@ import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid';
 import getSessionInfo from "../MiddleWare/auth.js"
 import Session from "./schema/session.js"
-import dotenv from "dotenv"
+// import dotenv from "dotenv"
 
 
-dotenv.config()
+// For Local Deploy
+// dotenv.config()
+// const PRODUCTION=process.env.PRODUCTION_API
+// const PORT=process.env.PORT
+
 
 const app = express()
 
@@ -27,16 +31,9 @@ app.use(cookieParser());
 
 
 
-const PRODUCTION=process.env.PRODUCTION_API
-const PORT=process.env.PORT
-
-
 const startServer = async() => {
   try {
-    Connect();
-    app.listen(PORT , () => {
-      console.log(`Server runnig on ${PRODUCTION}:${PORT}`)
-    })
+    await Connect();
   }
 
   catch(error) {

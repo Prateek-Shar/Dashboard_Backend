@@ -43,7 +43,7 @@ const startServer = async() => {
   }
 
   catch(error) {
-    console.log("Something Broke on server side")
+    console.log(`Failed to start the server : ${error}`)
   }
 }
 

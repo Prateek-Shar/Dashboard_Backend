@@ -71,7 +71,7 @@ app.post("/newUser", async (req, res) => {
     let UID = 1;
 
     for (let user of users) {
-      if (user.UID !== UID) break; // found a gap
+      if (user.UID !== UID) break; 
       UID++;
     }
 

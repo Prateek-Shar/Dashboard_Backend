@@ -861,7 +861,6 @@ app.get("/get_overview_stats" , getSessionInfo , async(req , res) => {
 // Logout Route -
 app.get("/logout", (req, res) => {
   res.clearCookie("SessionID", {
-    httpOnly: true,
     secure: true,
     sameSite: "None",
     path: "/",

@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 
-const connection = mongoose.connection;
-
 const userSchema = new mongoose.Schema({
     UID : {type : Number},
     Username: { type : String, required: true},

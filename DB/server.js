@@ -18,6 +18,7 @@ const PORT = process.env.PORT
 
 app.use(express.json());  
 app.use(express.urlencoded({ extended: true })); 
+app.use(cookieParser());
 
 
 const allowedOrigins = [
@@ -38,7 +39,6 @@ app.use(cors({
 }));
 
 
-app.use(cookieParser());
 
 
 app.listen(PORT , () => {
@@ -91,16 +91,25 @@ app.post("/newUser", async (req, res) => {
 
 });
 
-app.get("/check-auth", (req, res) => {
+app.get("/check-auth", async (req, res) => {
+  const sessionId = req.cookies.SessionID;
+  console.log("SessionID from cookie:", sessionId);
 
-  const SessionID = req.cookies.SessionID;
-
-  if (SessionID) {
-    res.sendStatus(200);
-  } else {
-    res.sendStatus(401);
+  if (!sessionId) {
+    return res.status(401).json({ message: "Not authenticated" });
   }
+
+  const session = await Session.findOne({ SessionID: sessionId });
+
+  if (!session) {
+    return res.status(401).json({ message: "Invalid session" });
+  }
+
+  // Optionally: verify session expiry or user info here
+
+  return res.sendStatus(200); // User is authenticated
 });
+
 
 
 

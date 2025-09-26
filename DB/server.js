@@ -92,7 +92,7 @@ app.post("/newUser", async (req, res) => {
 });
 
 app.get("/check-auth", async (req, res) => {
-  
+
   const sessionId = req.cookies.SessionID;
   console.log("SessionID from cookie:", sessionId);
 
@@ -868,7 +868,12 @@ app.get("/get_overview_stats" , getSessionInfo , async(req , res) => {
 
 // Logout Route -
 app.get("/logout", (req, res) => {
-  res.clearCookie("SessionID");
+  res.clearCookie("SessionID", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    path: "/",
+  });
   return res.status(200).json({ message: "Logged out" });
 });
 

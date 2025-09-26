@@ -130,7 +130,6 @@ app.post("/UserCheck", async (req, res) => {
     // Set session cookie
     res.cookie("SessionID", SessionID, {
       maxAge: 10 * 60 * 1000, // 10 minutes
-      httpOnly : true,
       secure: true,        // required for SameSite=None
       sameSite: "None",    // allow cross-site cookie
       path: "/",

@@ -26,15 +26,8 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // allow non-browser requests (like curl, Postman)
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
+  origin : allowedOrigins,
+  credentials : true,
 }));
 
 app.use(cookieParser());
@@ -91,7 +84,10 @@ app.post("/newUser", async (req, res) => {
 });
 
 app.get("/check-auth", (req, res) => {
-  if (req.session?.user) {
+
+  const SessionID = req.cookies.SessionID;
+
+  if (SessionID) {
     res.sendStatus(200);
   } else {
     res.sendStatus(401);

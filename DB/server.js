@@ -55,7 +55,7 @@ startServer();
 
 // Signup Routes -
 app.post("/newUser", async (req, res) => {
-  const { Username, Email, Password, Profession , UID } = req.body;
+  const { Username, Email, Password, Profession } = req.body;
   console.log("Received Data:", req.body);
 
   try {
@@ -67,8 +67,10 @@ app.post("/newUser", async (req, res) => {
       });
     }
 
+    const NumberOfUsers = await User.countDocuments()
+
     const newUser = await User.create({
-      UID,
+      "UID" : NumberOfUsers + 1, 
       Username,
       Email,
       Password,
@@ -103,7 +105,7 @@ app.get("/check-auth", async (req, res) => {
 app.get("/getUserLength" , async(req , res) => {
 
   try {
-    const NumberOfUsers = await User.countDocuments()
+    
 
     return res.status(200).json({UserCount : NumberOfUsers})
   }

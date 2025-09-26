@@ -28,13 +28,7 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true); // Allow this origin
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: allowedOrigins ,
   credentials: true
 }));
 
@@ -865,7 +859,6 @@ app.get("/get_overview_stats" , getSessionInfo , async(req , res) => {
 
 
 
-
 // Logout Route -
 app.get("/logout", (req, res) => {
   res.clearCookie("SessionID", {
@@ -876,7 +869,6 @@ app.get("/logout", (req, res) => {
   });
   return res.status(200).json({ message: "Logged out" });
 });
-
 
 
 

@@ -69,15 +69,16 @@ app.post("/newUser", async (req, res) => {
 
     const NumberOfUsers = await User.countDocuments()
 
-    const updatedUID = await User.find({"UID" : NumberOfUsers})
+    const UID = NumberOfUsers + 1
 
-    if(NumberOfUsers === updatedUID) {
-      NumberOfUsers + 1
+    const UID_Check = await User.find({"UID" : UID})
+
+    if(UID === UID_Check) {
+      UID = UID_Check + 1
     }
 
-
     const newUser = await User.create({
-      "UID" : NumberOfUsers,
+      "UID" : UID ,
       Username,
       Email,
       Password,

@@ -55,7 +55,7 @@ startServer();
 
 // Signup Routes -
 app.post("/newUser", async (req, res) => {
-  const { Username, Email, Password, Profession } = req.body;
+  const { Username, Email, Password, Profession , UID } = req.body;
   console.log("Received Data:", req.body);
 
   try {
@@ -68,6 +68,7 @@ app.post("/newUser", async (req, res) => {
     }
 
     const newUser = await User.create({
+      UID,
       Username,
       Email,
       Password,

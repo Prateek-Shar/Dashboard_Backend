@@ -19,6 +19,7 @@ const PORT = process.env.PORT
 app.use(express.json());  
 app.use(express.urlencoded({ extended: true })); 
 
+
 const allowedOrigins = [
   "http://localhost:5173",
   "https://insightboard.vercel.app",
@@ -27,17 +28,15 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true); // ✅ Allow specific origin
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true); // Allow this origin
     } else {
-      callback(new Error("Not allowed by CORS")); // ❌ Block
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true
 }));
+
 
 app.use(cookieParser());
 

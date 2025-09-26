@@ -67,17 +67,14 @@ app.post("/newUser", async (req, res) => {
       });
     }
 
-    const NumberOfUsers = await User.countDocuments()
+    const users = await User.find().sort({ UID: 1 }).select("UID");
+    let UID = 1;
 
-    const UID = NumberOfUsers + 1
-
-    const UID_Check = await User.find({"UID" : UID})
-
-    const UID_Check2 = await User.find({"UID" : UID + 1}).select("-Username -Password -Email -Profession -_id -__v").limit(1)
-
-    if(UID === UID_Check && UID === UID_Check2 + 1) {
-      UID = UID_Check2 + 1
+    for (let user of users) {
+      if (user.UID !== UID) break; // found a gap
+      UID++;
     }
+
 
     const newUser = await User.create({
       "UID" : UID ,

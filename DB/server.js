@@ -73,8 +73,10 @@ app.post("/newUser", async (req, res) => {
 
     const UID_Check = await User.find({"UID" : UID})
 
-    if(UID === UID_Check) {
-      UID = UID_Check + 1
+    const UID_Check2 = await User.find({"UID" : UID+1})
+
+    if(UID === UID_Check && UID === UID_Check2) {
+      UID = UID_Check + 2
     }
 
     const newUser = await User.create({

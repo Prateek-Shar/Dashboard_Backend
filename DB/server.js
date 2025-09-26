@@ -99,6 +99,21 @@ app.get("/check-auth", async (req, res) => {
 });
 
 
+app.get("/getUserLength" , async(req , res) => {
+
+  try {
+    const NumberOfUsers = await User.countDocuments()
+
+    return res.status(200).json({UserCount : NumberOfUsers})
+  }
+
+  catch(error) {
+    return res.json(401).json({error: "Error : " , error})
+  }
+
+})
+
+
 
 
 // Login Routes

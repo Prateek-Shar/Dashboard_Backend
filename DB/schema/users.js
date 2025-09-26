@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
-import AutoIncrementFactory from 'mongoose-sequence';   
 
 const connection = mongoose.connection;
-const AutoIncrement = AutoIncrementFactory(connection);
 
 const userSchema = new mongoose.Schema({
     UID : {type : Number},
@@ -12,8 +10,6 @@ const userSchema = new mongoose.Schema({
     Profession: { type : String, required: true },  
     CreatedAt: { type : String}
 })
-
-userSchema.plugin(AutoIncrement, { inc_field: 'UID' });
 
 
 const User = mongoose.model("User", userSchema);

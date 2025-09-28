@@ -153,7 +153,7 @@ app.post("/UserCheck", async (req, res) => {
     // Set session cookie
     res.cookie("SessionID", SessionID, {
       maxAge: 10 * 60 * 1000, // 10 minutes
-      secure: true,        // required for SameSite=None
+      secure: true,         // required for SameSite=None
       sameSite: "None",    // allow cross-site cookie
     });
 
@@ -882,7 +882,7 @@ app.get("/get_overview_stats" , getSessionInfo , async(req , res) => {
 
 // Logout Route -
 app.get("/logout", (req, res) => {
-  
+
   res.clearCookie("SessionID", {
     secure: true,
     sameSite: "None",

@@ -156,7 +156,6 @@ app.post("/UserCheck", async (req, res) => {
       secure: true,         // required for SameSite=None
       sameSite: "None",    // allow cross-site cookie
       path: "/",
-      domain: ".onrender.com",    
     });
 
 

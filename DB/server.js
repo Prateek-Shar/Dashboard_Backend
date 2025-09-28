@@ -155,6 +155,8 @@ app.post("/UserCheck", async (req, res) => {
       maxAge: 10 * 60 * 1000, // 10 minutes
       secure: true,         // required for SameSite=None
       sameSite: "None",    // allow cross-site cookie
+      path: "/",
+      domain: ".onrender.com",    
     });
 
 

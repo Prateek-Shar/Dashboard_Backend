@@ -24,14 +24,18 @@ app.use(cookieParser());
 const allowedOrigins = [
   "http://localhost:5173",
   "https://insightboard.vercel.app",
-  "https://dashboard-backend-1-0w4b.onrender.com"
 ];
 
 app.use(cors({
-  origin: allowedOrigins ,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
-
 
 
 

@@ -9,7 +9,9 @@ const customerSchema = new mongoose.Schema({
   Email: { type: String, required: true },
   Country: { type: String, required: true },
   Status: { type: String, required: true, enum: ["Active", "Inactive"] },
-  Created_at: { type: Date, default: Date.now }
+  Created_at: { type: Date, default: Date.now },
+  links: { type : String },
+  Industry : { type : String }
 });
 
 const Customer = mongoose.model("customers", customerSchema);

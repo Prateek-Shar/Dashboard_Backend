@@ -393,18 +393,18 @@ app.post("/send_customer", getSessionInfo , async (req, res) => {
 
   const UID = Number(req.userID); // Ensure UID is a number
 
-  const { Customer_name, Company_name, Contact_no, Country, Email, Status, Created_at, CID } = req.body;
+  const { Customer_name, Company_name, Contact_no, Country, Email, Status, Created_at, CID , links , Industry } = req.body;
 
-  // console.log("Request Body Starts")
+  console.log("Request Body Starts")
 
-  // console.log("Company name : " , req.body.Company_name);
-  // console.log("Customer name : ", req.body.Customer_name);
-  // console.log("CID : " , req.body.CID);
-  // console.log("Status : " , req.body.Status);
-  // console.log("Contact No : " , req.body.Contact_no)
-  // console.log("Email : " , req.body.Email)
-  // console.log("Country : " , req.body.Country)
-  // console.log("Created : " , req.body.Created_at)
+  console.log("Company name : " , req.body.Company_name);
+  console.log("Customer name : ", req.body.Customer_name);
+  console.log("CID : " , req.body.CID);
+  console.log("Status : " , req.body.Status);
+  console.log("Contact No : " , req.body.Contact_no)
+  console.log("Email : " , req.body.Email)
+  console.log("Country : " , req.body.Country)
+  console.log("Created : " , req.body.Created_at)
 
 
   // Validate after extracting
@@ -422,7 +422,9 @@ app.post("/send_customer", getSessionInfo , async (req, res) => {
       Email,
       Status,
       Created_at,
-      CID
+      CID,
+      links,
+      Industry
     });
 
     console.log("Data Sent Successfully");

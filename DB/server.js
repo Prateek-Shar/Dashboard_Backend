@@ -597,12 +597,8 @@ app.get("/getLatestTransaction" , getSessionInfo , async(req , res) => {
   const UID = Number(req.userID)
   console.log("UID : " , UID)
 
-  const endDate = new Date(); // now
-  const startDate = new Date();
-  startDate.setDate(endDate.getDate() - 31);
-
   try {
-    const result = await Income.find({"Created_at" : {$gt : startDate , $lt : endDate} , "UID" : UID}).select("-_id -UID -__v").limit(3).sort({"Created_at" : -1})
+    const result = await Income.find({"UID" : UID}).select("-_id -UID -__v").limit(3).sort({"Created_at" : -1})
 
     res.status(200).json({detail : result})
   }

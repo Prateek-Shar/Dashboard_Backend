@@ -22,7 +22,7 @@ app.use(cookieParser());
 
 
 const allowedOrigins = [
-  "http://localhost:5173",
+  "http://localhost:5174",
   "https://insightboard.vercel.app",
 ];
 
@@ -102,13 +102,12 @@ app.post("/newUser", async (req, res) => {
 app.get("/check-auth", async (req, res) => {
 
   const sessionId = req.cookies.SessionID;
-  console.log("SessionID from cookie:", sessionId);
 
   if (!sessionId) {
     return res.status(401).json({ message: "Not authenticated" });
   }
 
-  return res.sendStatus(200); // User is authenticated
+  return res.sendStatus(200);
 
 });
 
@@ -596,6 +595,7 @@ app.get("/getDataForPie" , getSessionInfo , async(req , res) => {
 app.get("/getLatestTransaction" , getSessionInfo , async(req , res) => {
 
   const UID = Number(req.userID)
+  console.log("UID : " , UID)
 
   const endDate = new Date(); // now
   const startDate = new Date();

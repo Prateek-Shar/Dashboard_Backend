@@ -598,7 +598,7 @@ app.get("/getLatestTransaction" , getSessionInfo , async(req , res) => {
   console.log("UID : " , UID)
 
   try {
-    const result = await Income.find({"UID" : UID}).select("-_id -UID -__v").limit(3).sort({"Created_at" : -1})
+    const result = await Income.find({"UID" : UID}).select("-_id -UID -__v").sort({"Created_at" : -1}).limit(3)
 
     res.status(200).json({detail : result})
   }

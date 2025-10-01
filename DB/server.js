@@ -144,7 +144,6 @@ app.post("/UserCheck", async (req, res) => {
     console.log("User authenticated:", userDoc.Username);
 
     const SessionID = uuidv4();
-    console.log("Session ID : " , SessionID)
     
 
     // Insert the session
@@ -595,7 +594,6 @@ app.get("/getDataForPie" , getSessionInfo , async(req , res) => {
 app.get("/getLatestTransaction" , getSessionInfo , async(req , res) => {
 
   const UID = Number(req.userID)
-  console.log("UID : " , UID)
 
   try {
     const result = await Income.find({"UID" : UID}).select("-_id -UID -__v").sort({"Created_at" : -1}).limit(3)

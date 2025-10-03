@@ -134,7 +134,11 @@ app.post("/UserCheck", async (req, res) => {
     const { Username, Password } = req.body;
     console.log("Login attempt with:", req.body);
 
+    if(!Username.req.body || !Password.req.body) {
+      return res.status(400).json({message : "Missing Fields"})
+    }
     
+
     const userDoc = await User.findOne({ Username, Password });
 
     if (!userDoc) {
@@ -142,16 +146,8 @@ app.post("/UserCheck", async (req, res) => {
       return res.status(404).json({ message: "Invalid username or password" });
     }
 
-    if(!Username || !Password) {
-      return res.status(400).json({message : "Missing Fields"})
-    }
-
-
-    console.log("User authenticated:", userDoc.Username);
-
     const SessionID = uuidv4();
     
-
     // Insert the session
     await Session.insertOne({
       UID: userDoc.UID,

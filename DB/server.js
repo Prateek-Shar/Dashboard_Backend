@@ -142,6 +142,11 @@ app.post("/UserCheck", async (req, res) => {
       return res.status(404).json({ message: "Invalid username or password" });
     }
 
+    if(!Username || !Password) {
+      return res.status(400).json({message : "Missing Fields"})
+    }
+
+
     console.log("User authenticated:", userDoc.Username);
 
     const SessionID = uuidv4();

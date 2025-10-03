@@ -134,6 +134,7 @@ app.post("/UserCheck", async (req, res) => {
     const { Username, Password } = req.body;
     console.log("Login attempt with:", req.body);
 
+    
     const userDoc = await User.findOne({ Username, Password });
 
     if (!userDoc) {

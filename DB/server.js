@@ -140,7 +140,8 @@ app.post("/UserCheck", async (req, res) => {
     }
 
     const userDoc = await User.findOne({ "Username" : Username, "Password" : Password });
-
+    console.log(userDoc)
+    
     if (!userDoc) {
       console.log("User not found or invalid credentials");
       return res.status(404).json({ msg: "Invalid username or password" });

@@ -139,7 +139,7 @@ app.post("/UserCheck", async (req, res) => {
       return res.status(400).json({ msg: "Missing Fields" });
     }
 
-    const userDoc = await User.findOne({ Username, Password });
+    const userDoc = await User.findOne({ "Username" : Username, "Password" : Password });
 
     if (!userDoc) {
       console.log("User not found or invalid credentials");

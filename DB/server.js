@@ -130,53 +130,48 @@ app.get("/getUserLength" , async(req , res) => {
 // Login Routes
 app.post("/UserCheck", async (req, res) => {
 
-  try {
-    const { Username, Password } = req.body;
-    console.log("Login attempt with:", req.body);
+  console.log("Username : " , req.body.Username)
+  console.log("Password : " , req.body.Password)
 
-    if(!Username.req.body || !Password.req.body) {
-      return res.status(400).json({message : "Missing Fields"})
+  try {
+    // ✅ now you can safely check them
+    if (!req.body.Username || !req.body.Password) {
+      return res.status(400).json({ msg: "Missing Fields" });
     }
-    
 
     const userDoc = await User.findOne({ Username, Password });
 
     if (!userDoc) {
       console.log("User not found or invalid credentials");
-      return res.status(404).json({ message: "Invalid username or password" });
+      return res.status(404).json({ msg: "Invalid username or password" });
     }
 
     const SessionID = uuidv4();
-    
-    // Insert the session
+
     await Session.insertOne({
       UID: userDoc.UID,
-      SessionID: SessionID
+      SessionID: SessionID,
     });
 
-    // Set session cookie
     res.cookie("SessionID", SessionID, {
-      maxAge: 10 * 60 * 1000, 
-      secure: true,         
-      sameSite: "none",    
-      httpOnly : true,
+      maxAge: 10 * 60 * 1000,
+      secure: true,
+      sameSite: "none",
+      httpOnly: true,
       path: "/",
     });
 
-
-    
     return res.status(200).json({
       message: "Login successful",
       login_det: {
         Username: userDoc.Username,
         Profession: userDoc.Profession,
-        UID: userDoc.UID
-      }
+        UID: userDoc.UID,
+      },
     });
-
-  } catch (err) {
-    console.error("Error in login:", err);
-    return res.status(500).json({ error: "Internal Server Error" });
+  } catch (error) {
+    console.error("Error in login:", error);
+    return res.status(500).json({ msg: "Internal Server Error" });
   }
 });
 

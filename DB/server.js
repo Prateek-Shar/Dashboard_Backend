@@ -143,8 +143,7 @@ app.post("/UserCheck", async (req, res) => {
     console.log(userDoc)
 
     if (!userDoc) {
-      console.log("User not found or invalid credentials");
-      return res.status(404).json({ msg: "Invalid username or password" });
+      return res.status(404).json({ msg: "Invalid Username or Password" });
     }
 
     const SessionID = uuidv4();

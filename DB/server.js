@@ -59,15 +59,20 @@ startServer();
 
 // Signup Routes -
 app.post("/newUser", async (req, res) => {
+
   const { Username, Email, Password, Profession } = req.body;
-  console.log("Received Data:", req.body);
 
   try {
+
+    if (!Username || !Email || !Password || !Profession) {
+      return res.status(400).json({err_msg : "Missing Fields"})
+    }
+
     const existing_user = await User.find({ Username });
 
     if (existing_user.length > 0) {
       return res.status(400).json({
-        existing_error: "Same User Found. Try creating acc. with different username"
+        err_msg: "Same User Found. Try creating acc. with different username"
       });
     }
 

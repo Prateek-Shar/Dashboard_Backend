@@ -749,7 +749,7 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
   console.log("UID:", UID);
 
   // Start of current month
-  const startOfMonth = new Date();
+  const startOfMonth = new Date().getMonth()-12;
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
@@ -757,8 +757,6 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
   const startOfNextMonth = new Date(startOfMonth);
   startOfNextMonth.setMonth(startOfMonth.getMonth() + 12);
 
-  console.log("ISO Start Date : " , toString.startOfMonth)
-  console.log("ISO End Date : " , toString.startOfNextMonth)
 
   // console.log("Start Date : " , startOfMonth)
   // console.log("End Date : " , startOfNextMonth)

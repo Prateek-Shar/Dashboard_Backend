@@ -733,8 +733,10 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
         $match : {  
           UID : UID ,
           Created_at : { $gte : startOfToday , $lte : endOfToday }
-        } ,
+        }
+      } ,
 
+      {
         $group : {
           _id : "$Catagory",
           amt : { $sum : "$Amount"}

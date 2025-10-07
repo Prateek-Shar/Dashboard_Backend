@@ -695,6 +695,10 @@ app.get("/get_data_by_month", getSessionInfo, async (req, res) => {
 
     const response = await Income.aggregate([
       {
+        $match : {
+          $gte : startOfMonth , $lte : startOfNextMonth
+        } ,
+
         $group : {
           _id : "$Catagory", 
           amt : { $sum : "$Amount" }

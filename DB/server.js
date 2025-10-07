@@ -721,14 +721,13 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
 
   // Get start of today
   const start = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
 
   // Get end of today
   const end = new Date();
-  endOfToday.setHours(23, 59, 59, 999);
+
 
   try {
-    const response = await Income.find([
+    const response = await Income.aggregate([
       {
         $match : {  
           UID : UID ,

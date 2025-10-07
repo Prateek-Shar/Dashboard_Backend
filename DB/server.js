@@ -692,10 +692,19 @@ app.get("/get_data_by_month", getSessionInfo, async (req, res) => {
   startOfNextMonth.setMonth(startOfMonth.getMonth() + 30);
 
   try {
-    const response = await Income.find({
-      Created_at: { $gte: startOfMonth, $lt: startOfNextMonth },
-      UID
-    }).select("-_id -__v -Created_at -Source -Date");
+
+    const response = await Income.aggregate([
+      {
+        $group : {
+          _id : "$Catagory", 
+          amt : { $sum : "$Amount" }
+        }
+      }
+    ])
+    // const response = await Income.find({
+    //   Created_at: { $gte: startOfMonth, $lt: startOfNextMonth },
+    //   UID
+    // }).select("-_id -__v -Created_at -Source -Date");
 
     res.status(200).json({ detail: response });
   } catch (error) {

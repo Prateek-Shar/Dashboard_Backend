@@ -766,8 +766,8 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
     const response = await Income.aggregate([
       {
         $match: {
-          userId: UID, 
-          createdAt: { $gte: start, $lte: end }
+          UID : UID, 
+          Created_at: { $gte: start, $lte: end }
         }
       },
       {

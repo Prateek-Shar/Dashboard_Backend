@@ -94,7 +94,6 @@ app.post("/newUser", async (req, res) => {
       Date_created: new Date()
     });
 
-    console.log("New user created:", newUser);
     return res.status(201).json({ user: newUser , login_success : "User created successfully"});
 
   } catch (error) {
@@ -134,9 +133,6 @@ app.get("/getUserLength" , async(req , res) => {
 
 // Login Routes
 app.post("/UserCheck", async (req, res) => {
-
-  console.log("Username : " , req.body.Username)
-  console.log("Password : " , req.body.Password)
 
   try {
     // ✅ now you can safely check them
@@ -284,8 +280,6 @@ app.post("/send_products", getSessionInfo , async (req, res) => {
   const UID = req.userID;
 
 
-  console.log("Form data : " , req.body)
-
   try {
     const existingProduct = await Product.findOne({ Product_name, UID });
 
@@ -376,9 +370,7 @@ app.get("/get_product_statistics", getSessionInfo , async (req, res) => {
 // Customer Routes -
 app.get('/search_customer' , getSessionInfo , async (req, res) => {
     const { name } = req.query;
-    console.log("Searching for customer:", name);
     const UID = req.userID
-    console.log("Searching for UID number :", UID);
 
     try {
         const customer = await Customer.find({ Customer_name : name , UID : UID }).select("-Date_created -_id -UserID -__v"); // Case-sensitive Exact Match
@@ -395,16 +387,16 @@ app.post("/send_customer", getSessionInfo , async (req, res) => {
 
   const { Customer_name, Company_name, Contact_no, Country, Email, Status, Created_at, CID , links , Industry } = req.body;
 
-  console.log("Request Body Starts")
+  // console.log("Request Body Starts")
 
-  console.log("Company name : " , req.body.Company_name);
-  console.log("Customer name : ", req.body.Customer_name);
-  console.log("CID : " , req.body.CID);
-  console.log("Status : " , req.body.Status);
-  console.log("Contact No : " , req.body.Contact_no)
-  console.log("Email : " , req.body.Email)
-  console.log("Country : " , req.body.Country)
-  console.log("Created : " , req.body.Created_at)
+  // console.log("Company name : " , req.body.Company_name);
+  // console.log("Customer name : ", req.body.Customer_name);
+  // console.log("CID : " , req.body.CID);
+  // console.log("Status : " , req.body.Status);
+  // console.log("Contact No : " , req.body.Contact_no)
+  // console.log("Email : " , req.body.Email)
+  // console.log("Country : " , req.body.Country)
+  // console.log("Created : " , req.body.Created_at)
 
 
   // Validate after extracting
@@ -427,7 +419,6 @@ app.post("/send_customer", getSessionInfo , async (req, res) => {
       Industry
     });
 
-    console.log("Data Sent Successfully");
     return res.status(200).json({ New_Entry: result });
     
     
@@ -435,7 +426,6 @@ app.post("/send_customer", getSessionInfo , async (req, res) => {
     if (error.code === 11000) {
       return res.status(409).json({ message: "Email already exists" });
     }
-    console.log("Error while creating customer:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -475,7 +465,6 @@ app.delete("/deleteCustomer" , getSessionInfo , async(req , res) => {
 
   try {
     const response = await Customer.deleteOne({ "UID" : UID , "Email" : email})
-    console.log(response)
 
     return res.status(200).json({response : "Data Deleted"})
   }
@@ -490,8 +479,6 @@ app.delete("/deleteCustomer" , getSessionInfo , async(req , res) => {
 app.get("/getDataAccToFilter" , getSessionInfo , async(req ,res) => {
   const UID = Number(req.userID);
   const { value } = req.query;
-
-  console.log("Filter name : " , value);
 
   try {
 
@@ -626,8 +613,6 @@ app.post("/send_income" , getSessionInfo ,  async(req , res) => {
   const UID = Number(req.userID)
 
   const { Source , Amount , Catagory , Created_at } = req.body
-  console.log(req.body)
-
 
   try {
     const IncomeEntry = await Income.create({Created_at , Source , Amount , Catagory , UID})
@@ -727,10 +712,6 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
   const end = new Date();
   end.setHours(23, 59, 59, 999)
 
-  console.log("Start : " , start)
-  console.log("End : " , end)
-
-
   try {
     const response = await Income.aggregate([
       {
@@ -750,7 +731,7 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
     ])
 
     res.status(200).json({ detail: response });
-    console.log(response);
+  
   } catch (error) {
     console.error("Error fetching daily data:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -762,7 +743,6 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
 
 app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
   const UID = Number(req.userID);
-  console.log("UID:", UID);
 
   const currentDate = new Date();
 

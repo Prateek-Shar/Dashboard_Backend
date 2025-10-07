@@ -748,19 +748,19 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
   const UID = Number(req.userID);
   console.log("UID:", UID);
 
-  // Start of current month
-  const currentdate = new Date().getMonth();
-  const start = currentdate.getMonth() - 12;
-  const end = currentdate.getMonth() + 12;
+  const currentDate = new Date();
 
+  // Start date = 12 months before current month
+  const start = new Date(currentDate);
+  start.setMonth(currentDate.getMonth() - 12);
 
-  // Start of next month
-  // const startOfNextMonth = new Date(startOfMonth);
-  // startOfNextMonth.setMonth(startOfMonth.getMonth() + 12);
+  // End date = 12 months after current month
+  const end = new Date(currentDate);
+  end.setMonth(currentDate.getMonth() + 12);
 
+  console.log("Start:", start);
+  console.log("End:", end);
 
-  console.log("Start Date : " , startOfMonth)
-  console.log("End Date : " , startOfNextMonth)
 
   try {
     const response = await Income.aggregate([

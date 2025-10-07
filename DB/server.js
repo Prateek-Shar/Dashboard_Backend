@@ -772,8 +772,8 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
       },
       {
         $group: {
-          _id: "$category",
-          amt: { $sum: "$amount" }
+          _id: "$Catagory",
+          amt: { $sum: "$Amount" }
         }
       }
     ]);

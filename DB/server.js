@@ -696,7 +696,7 @@ app.get("/get_data_by_month", getSessionInfo, async (req, res) => {
       {
         $match: {
           UID : UID, 
-          Ccreated_at: { $gte: startOfMonth, $lte: startOfNextMonth }
+          Created_at: { $gte: startOfMonth, $lte: startOfNextMonth }
         }
       },
       {
@@ -732,7 +732,7 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
       {
         $match : {  
           UID : UID ,
-          $gte : startOfToday , $lte : endOfToday
+          $gte : { startOfToday , $lte : endOfToday }
         } ,
 
         $group : {

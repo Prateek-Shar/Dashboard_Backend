@@ -720,11 +720,11 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
   const UID = Number(req.userID);
 
   // Get start of today
-  const startOfToday = new Date();
+  const start = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
   // Get end of today
-  const endOfToday = new Date();
+  const end = new Date();
   endOfToday.setHours(23, 59, 59, 999);
 
   try {
@@ -732,7 +732,7 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
       {
         $match : {  
           UID : UID ,
-          Created_at : { $gte : startOfToday , $lte : endOfToday }
+          Created_at : { $gte : start , $lte : end }
         }
       } ,
 

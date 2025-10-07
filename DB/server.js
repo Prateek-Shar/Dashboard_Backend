@@ -755,13 +755,27 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
 
   // Start of next month
   const startOfNextMonth = new Date(startOfMonth);
-  startOfNextMonth.setMonth(startOfMonth.getMonth() + 365);
+  startOfNextMonth.setMonth(startOfMonth.getMonth() + 12);
 
   try {
-    const response = await Income.find({
-      Created_at: { $gte: startOfMonth, $lt: startOfNextMonth },
-      UID
-    }).select("-_id -__v -Created_at -Source -Date");
+    // const response = await Income.find({
+    //   Created_at: { $gte: startOfMonth, $lt: startOfNextMonth },
+    //   UID
+    // }).select("-_id -__v -Created_at -Source -Date");
+    const response = await Income.aggregate([
+      {
+        $match: {
+          userId: UID, 
+          createdAt: { $gte: startOfMonth, $lte: startOfNextMonth }
+        }
+      },
+      {
+        $group: {
+          _id: "$category",
+          amt: { $sum: "$amount" }
+        }
+      }
+    ]);
 
     res.status(200).json({ detail: response });
   } catch (error) {

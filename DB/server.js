@@ -721,6 +721,7 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
 
   // Get start of today
   const start = new Date();
+  start.setHours(0, 0, 0, 0)
 
   // Get end of today
   const end = new Date();

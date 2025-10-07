@@ -695,14 +695,14 @@ app.get("/get_data_by_month", getSessionInfo, async (req, res) => {
     const response = await Income.aggregate([
       {
         $match: {
-          userId: UID, 
-          createdAt: { $gte: startOfMonth, $lte: startOfNextMonth }
+          UID : UID, 
+          Ccreated_at: { $gte: startOfMonth, $lte: startOfNextMonth }
         }
       },
       {
         $group: {
-          _id: "$category",
-          amt: { $sum: "$amount" }
+          _id: "$Catagory",
+          amt: { $sum: "$Amount" }
         }
       }
     ]);
@@ -728,10 +728,20 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
   endOfToday.setHours(23, 59, 59, 999);
 
   try {
-    const response = await Income.find({
-      Created_at: { $gte: startOfToday, $lt: endOfToday },
-      UID
-    }).select("-_id -__v -Source -Date");
+    const response = await Income.find([
+      {
+        $match : {  
+          UID : UID ,
+          $gte : startOfToday , $lte : endOfToday
+        } ,
+
+        $group : {
+          _id : "$Catagory",
+          amt : { $sum : "$Amount"}
+        }
+      }
+
+    ])
 
     res.status(200).json({ detail: response });
     console.log(response);
@@ -757,10 +767,6 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
   // End date = 12 months after current month
   const end = new Date(currentDate);
   end.setMonth(currentDate.getMonth());
-
-  console.log("Start:", start);
-  console.log("End:", end);
-
 
   try {
     const response = await Income.aggregate([

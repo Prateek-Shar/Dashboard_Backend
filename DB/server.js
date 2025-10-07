@@ -756,12 +756,11 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
   // Start of next month
   const startOfNextMonth = new Date(startOfMonth);
   startOfNextMonth.setMonth(startOfMonth.getMonth() + 12);
+  
+  console.log("Start Date : " , startOfMonth)
+  console.log("End Date : " , startOfNextMonth)
 
   try {
-    // const response = await Income.find({
-    //   Created_at: { $gte: startOfMonth, $lt: startOfNextMonth },
-    //   UID
-    // }).select("-_id -__v -Created_at -Source -Date");
     const response = await Income.aggregate([
       {
         $match: {

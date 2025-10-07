@@ -756,7 +756,7 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
 
   // End date = 12 months after current month
   const end = new Date(currentDate);
-  end.setMonth(currentDate.getMonth() + 12);
+  end.setMonth(currentDate.getMonth());
 
   console.log("Start:", start);
   console.log("End:", end);

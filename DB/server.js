@@ -692,19 +692,20 @@ app.get("/get_data_by_month", getSessionInfo, async (req, res) => {
   startOfNextMonth.setMonth(startOfMonth.getMonth() + 1);
 
   try {
-
     const response = await Income.aggregate([
       {
-        $match : {
-          Created_at : { $gte : startOfMonth , $lte : startOfNextMonth }
-        } ,
-
-        $group : {
-          _id : "$Source", 
-          amt : { $sum : "$Amount" }
+        $match: {
+          userId: UID, 
+          createdAt: { $gte: startOfMonth, $lte: startOfNextMonth }
+        }
+      },
+      {
+        $group: {
+          _id: "$category",
+          amt: { $sum: "$amount" }
         }
       }
-    ])
+    ]);
 
     res.status(200).json({ detail: response });
   } catch (error) {

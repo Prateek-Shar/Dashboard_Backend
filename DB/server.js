@@ -725,6 +725,9 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
   // Get end of today
   const end = new Date();
 
+  console.log("Start : " , start)
+  console.log("End : " , end)
+
 
   try {
     const response = await Income.aggregate([

@@ -756,9 +756,12 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
   // Start of next month
   const startOfNextMonth = new Date(startOfMonth);
   startOfNextMonth.setMonth(startOfMonth.getMonth() + 12);
-  
-  console.log("Start Date : " , startOfMonth)
-  console.log("End Date : " , startOfNextMonth)
+
+  console.log("ISO Start Date : " , toString.startOfMonth)
+  console.log("ISO End Date : " , toString.startOfNextMonth)
+
+  // console.log("Start Date : " , startOfMonth)
+  // console.log("End Date : " , startOfNextMonth)
 
   try {
     const response = await Income.aggregate([

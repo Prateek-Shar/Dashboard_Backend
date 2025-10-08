@@ -779,12 +779,14 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
 
 
 
-app.get("/getIncomeStats", async (req, res) => {
+app.get("/getIncomeStats", getSessionInfo , async (req, res) => {
+  const UID = Number(req.userID);
+
   try {
     const now = new Date();
 
     // ----------- TOTAL TRANSACTIONS -----------
-    const totalTransactions = await Income.countDocuments();
+    const totalTransactions = await Income.countDocuments({"UID" : UID});
 
     // ----------- TOTAL INCOME -----------
     const totalIncomeAgg = await Income.aggregate([
@@ -805,6 +807,7 @@ app.get("/getIncomeStats", async (req, res) => {
           Created_at: {
             $gte: startOfCurrentMonth,
             $lt: endOfCurrentMonth,
+            "UID" : UID,
           },
         },
       },
@@ -823,6 +826,7 @@ app.get("/getIncomeStats", async (req, res) => {
           Created_at: {
             $gte: startOfPreviousMonth,
             $lt: endOfPreviousMonth,
+            "UID" : UID
           },
         },
       },
@@ -848,6 +852,7 @@ app.get("/getIncomeStats", async (req, res) => {
         $group: {
           _id: "$Catagory",
           count: { $sum: 1 },
+          "UID" : UID
         },
       },
       { $sort: { count: -1 } },

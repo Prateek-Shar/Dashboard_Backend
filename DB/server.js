@@ -790,7 +790,7 @@ app.get("/getIncomeStats", getSessionInfo , async (req, res) => {
 
     // ----------- TOTAL INCOME -----------
     const totalIncomeAgg = await Income.aggregate([
-      { $group: { _id: null, total: { $sum: "$Amount" } } },
+      { $group: { _id: null, total: { $sum: "$Amount" } , "UID" : UID} },
     ]);
     const totalIncome = totalIncomeAgg[0]?.total || 0;
 
@@ -804,11 +804,8 @@ app.get("/getIncomeStats", getSessionInfo , async (req, res) => {
     const currentMonthIncomeAgg = await Income.aggregate([
       {
         $match: {
-          Created_at: {
-            $gte: startOfCurrentMonth,
-            $lt: endOfCurrentMonth,
-            "UID" : UID,
-          },
+          Created_at : { $gte: startOfCurrentMonth, $lt: endOfCurrentMonth },
+          "UID" : UID
         },
       },
       {
@@ -823,11 +820,8 @@ app.get("/getIncomeStats", getSessionInfo , async (req, res) => {
     const previousMonthIncomeAgg = await Income.aggregate([
       {
         $match: {
-          Created_at: {
-            $gte: startOfPreviousMonth,
-            $lt: endOfPreviousMonth,
-            "UID" : UID
-          },
+          Created_at: { $gte: startOfPreviousMonth, $lt: endOfPreviousMonth },
+          "UID" : UID
         },
       },
       {

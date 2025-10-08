@@ -779,18 +779,19 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
 
 
 
-app.get("/getIncomeStats", getSessionInfo , async (req, res) => {
+app.get("/getIncomeStats", getSessionInfo, async (req, res) => {
   const UID = Number(req.userID);
 
   try {
     const now = new Date();
 
     // ----------- TOTAL TRANSACTIONS -----------
-    const totalTransactions = await Income.countDocuments({"UID" : UID});
+    const totalTransactions = await Income.countDocuments({ UID });
 
     // ----------- TOTAL INCOME -----------
     const totalIncomeAgg = await Income.aggregate([
-      { $group: { _id: null, total: { $sum: "$Amount" } , "UID" : UID} },
+      { $match: { UID } },
+      { $group: { _id: null, total: { $sum: "$Amount" } } },
     ]);
     const totalIncome = totalIncomeAgg[0]?.total || 0;
 
@@ -801,38 +802,31 @@ app.get("/getIncomeStats", getSessionInfo , async (req, res) => {
     const startOfPreviousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const endOfPreviousMonth = startOfCurrentMonth;
 
+    // Current Month
     const currentMonthIncomeAgg = await Income.aggregate([
       {
         $match: {
-          Created_at : { $gte: startOfCurrentMonth, $lt: endOfCurrentMonth },
-          "UID" : UID
+          UID,
+          Created_at: { $gte: startOfCurrentMonth, $lt: endOfCurrentMonth },
         },
       },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$Amount" },
-        },
-      },
+      { $group: { _id: null, total: { $sum: "$Amount" } } },
     ]);
     const currentIncome = currentMonthIncomeAgg[0]?.total || 0;
 
+    // Previous Month
     const previousMonthIncomeAgg = await Income.aggregate([
       {
         $match: {
+          UID,
           Created_at: { $gte: startOfPreviousMonth, $lt: endOfPreviousMonth },
-          "UID" : UID
         },
       },
-      {
-        $group: {
-          _id: null,
-          total: { $sum: "$Amount" },
-        },
-      },
+      { $group: { _id: null, total: { $sum: "$Amount" } } },
     ]);
     const previousIncome = previousMonthIncomeAgg[0]?.total || 0;
 
+    // Growth %
     let growth = 0;
     if (previousIncome !== 0) {
       growth = ((currentIncome - previousIncome) / previousIncome) * 100;
@@ -842,11 +836,11 @@ app.get("/getIncomeStats", getSessionInfo , async (req, res) => {
 
     // ----------- TOP CATEGORY -----------
     const topCategoryAgg = await Income.aggregate([
+      { $match: { UID } },
       {
         $group: {
           _id: "$Catagory",
           count: { $sum: 1 },
-          "UID" : UID
         },
       },
       { $sort: { count: -1 } },

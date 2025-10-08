@@ -633,7 +633,6 @@ app.get("/get_income_detail" , getSessionInfo , async(req , res) => {
   const skip = (pageNumber - 1) * pageSize;
 
   const UID = Number(req.userID); // <- convert to number!
-  console.log("UID:", UID);
 
   try {
       const response = await Income.find({UID})

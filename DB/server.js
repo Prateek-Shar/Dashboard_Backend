@@ -76,8 +76,8 @@ app.post("/newUser", async (req, res) => {
       });
     }
 
-    const users = await User.find().sort({ UID: 1 }).select("UID");
-    let UID = 1;
+    const users = await User.find().sort({"UID" : 1}).select("UID");
+    let UID = 1;  
 
     for (let user of users) {
       if (user.UID !== UID) break; 

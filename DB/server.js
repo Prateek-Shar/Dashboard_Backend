@@ -9,14 +9,9 @@ import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid';
 import getSessionInfo from "../MiddleWare/auth.js"
 import Session from "./schema/session.js"
-import dotenv from "dotenv"
+
 
 const app = express()
-dotenv.config()
-
-const PORT = process.env.PORT
-
-const LOCAL_ADDRESS = process.env.LOCAL_ADDRESS;
 
 app.use(express.json());  
 app.use(express.urlencoded({ extended: true })); 
@@ -45,7 +40,7 @@ app.options("*", cors());
 app.set("trust proxy" , 1)
 
 
-app.listen(PORT , async() => {
+app.listen( async() => {
 
   try {
     await Connect();

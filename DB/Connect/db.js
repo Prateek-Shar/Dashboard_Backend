@@ -3,6 +3,7 @@ import dotenv from "dotenv"
 
 // For Local Deployemnt
 dotenv.config()
+
 const uri = process.env.MONGO_URI
 
 const Connect = async () => {

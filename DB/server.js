@@ -29,7 +29,7 @@ app.use(cors({
     }
   },
   credentials: true,
-  methods : "GET,POST,OPTIONS" , 
+  methods : ["GET","POST","OPTIONS"], 
   allowedHeaders : ["Content-Type"]
 })); 
 

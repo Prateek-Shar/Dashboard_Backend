@@ -40,10 +40,11 @@ app.use(cors({
 app.set("trust proxy" , 1)
 
 
-app.listen(/* PORT */  async() => {
+app.listen(PORT ,  async() => {
 
   try {
     await Connect();
+    console.info(`Sever is ruuning on port ${PORT}`)
     // console.log(`Server is running on : http://localhost:${PORT}`)
   }
 

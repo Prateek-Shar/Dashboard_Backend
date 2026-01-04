@@ -13,10 +13,6 @@ import Session from "./schema/session.js"
 
 const app = express()
 
-app.use(express.json());  
-app.use(express.urlencoded({ extended: true })); 
-app.use(cookieParser());
-
 const PORT = process.env.PORT || 8080;
 
 const allowedOrigins = [
@@ -25,15 +21,23 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(null, false);
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, origin);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
   },
   credentials: true,
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"]
-}));
+  methods : "GET,POST" , 
+  allowedHeaders : ["Content-Type"]
+})); 
+
+
+app.use(express.json());  
+app.use(express.urlencoded({ extended: true })); 
+app.use(cookieParser());
+
 
 app.set("trust proxy" , 1)
 

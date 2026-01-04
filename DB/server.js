@@ -142,7 +142,7 @@ app.post("/UserCheck", async (req, res) => {
 
     res.cookie("SessionID", SessionID, {
       maxAge: 10 * 60 * 1000,
-      secure: false,
+      secure: true,
       sameSite: "lax",
       httpOnly: true,
       path: "/",

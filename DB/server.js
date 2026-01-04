@@ -17,6 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })); 
 app.use(cookieParser());
 
+const PORT = process.env.PORT || 8080;
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -39,10 +40,11 @@ app.use(cors({
 app.set("trust proxy" , 1)
 
 
-app.listen( async() => {
+app.listen(PORT ,  async() => {
 
   try {
     await Connect();
+    // console.log(`Server is running on : http://localhost:${PORT}`)
   }
 
   catch(error) {
@@ -100,20 +102,6 @@ app.post("/newUser", async (req, res) => {
 
 });
 
-// app.get("/check-auth", async (req, res) => {
-
-//   const sessionId = req.cookies.SessionID;
-
-//   if (!sessionId) {
-//     console.log("Session ID not available")
-//     return res.status(401).json({ message: "Not authenticated" });
-//   }
-
-//   console.log("Session ID available")
-//   return res.sendStatus(200);
-
-// });
-
 
 app.get("/getUserLength" , async(req , res) => {
 
@@ -154,8 +142,8 @@ app.post("/UserCheck", async (req, res) => {
 
     res.cookie("SessionID", SessionID, {
       maxAge: 10 * 60 * 1000,
-      secure: true,
-      sameSite: "none",
+      secure: false,
+      sameSite: "lax",
       httpOnly: true,
       path: "/",
     });
@@ -184,14 +172,11 @@ app.get("/getUserInfo" , async (req, res) => {
   const sessionId = req.cookies.SessionID;
 
   if (!sessionId) {
-    console.error("No Session ID found in sessions");
     return res.status(401).json({ error: "No session cookie found" });
   }
 
   try {
     const session = await Session.findOne({ SessionID: sessionId });
-    console.info("Session id : " , sessionId )
-    console.log("Session ID Found");
 
     if (!session) {
       console.error("No Session ID found in DB")

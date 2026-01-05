@@ -13,6 +13,18 @@ import Session from "./schema/session.js"
 
 const app = express()
 
+// Cors 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://insightboard.vercel.app",
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
+
 const PORT = process.env.PORT || 8080;
 
 app.use(express.json());  
@@ -21,24 +33,20 @@ app.use(cookieParser());
 
 
 
-// Cors 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://insightboar.vercel.app",
-];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, origin);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods : ["GET","POST","OPTIONS"], 
-  allowedHeaders : ["Content-Type"]
-})); 
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, origin);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   credentials: true,
+//   methods : ["GET","POST","OPTIONS"], 
+//   allowedHeaders : ["Content-Type"]
+// })); 
 
 app.options(/.*/, cors());
 

@@ -15,6 +15,13 @@ const app = express()
 
 const PORT = process.env.PORT || 8080;
 
+app.use(express.json());  
+app.use(express.urlencoded({ extended: true })); 
+app.use(cookieParser());
+
+
+
+// Cors 
 const allowedOrigins = [
   "http://localhost:5173",
   "https://insightboard.vercel.app",
@@ -34,14 +41,10 @@ app.use(cors({
 })); 
 
 
-app.use(express.json());  
-app.use(express.urlencoded({ extended: true })); 
-app.use(cookieParser());
 
 
-app.set("trust proxy" , 1)
 
-
+// Server Starts
 app.listen(PORT ,  async() => {
 
   try {

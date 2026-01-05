@@ -24,7 +24,7 @@ app.use(cookieParser());
 // Cors 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://insightboard.vercel.app",
+  "https://insightboar.vercel.app",
 ];
 
 app.use(cors({

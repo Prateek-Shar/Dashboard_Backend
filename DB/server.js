@@ -16,7 +16,6 @@ const app = express()
 // Cors 
 const allowedOrigins = [
   "http://localhost:5173",
-  "http://localhost:8080",
   "https://insightboard.vercel.app",
 ];
 
@@ -34,17 +33,14 @@ app.use(cookieParser());
 
 
 
-// app.options(/.*/, cors());
-
-
 
 // Server Starts
 app.listen(PORT ,  async() => {
 
   try {
     await Connect();
-    console.info(`Sever is ruuning on port ${PORT}`)
-    // console.log(`Server is running on : http://localhost:${PORT}`)
+    // console.info(`Sever is ruuning on port ${PORT}`)
+    console.log(`Server is running on : http://localhost:${PORT}`)
   }
 
   catch(error) {
@@ -142,7 +138,7 @@ app.post("/UserCheck", async (req, res) => {
 
     res.cookie("SessionID", SessionID, {
       maxAge: 10 * 60 * 1000,
-      secure: false,
+      secure: true,
       sameSite: "none",
       httpOnly: true,
       path: "/",

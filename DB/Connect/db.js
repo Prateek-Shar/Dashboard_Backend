@@ -1,23 +1,24 @@
-import mongoose from "mongoose"
-import dotenv from "dotenv"
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// For Local Deployemnt
-dotenv.config()
-
-const uri = process.env.MONGO_URI
+// Ensure `.env` is loaded regardless of cwd.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, "..", "..", ".env") });
 
 const Connect = async () => {
-    try {
-        await mongoose.connect(uri , {
-            dbName : "Dashboard"
-        })
-        
-        console.log("DB Connected Successfully")
-    }
+  const uri = process.env.MONGO_URI;
 
-    catch(error) {
-        console.log("Error Msg : " , error)
-    }
-}
+  if (!uri) {
+    throw new Error(
+      "MONGO_URI is missing. Ensure Backend/.env contains MONGO_URI or set it in environment variables."
+    );
+  }
+
+  await mongoose.connect(uri, { dbName: "Dashboard" });
+  console.log("DB Connected Successfully");
+};
 
 export default Connect;

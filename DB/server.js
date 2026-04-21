@@ -131,7 +131,7 @@ app.post("/UserCheck", async (req, res) => {
 
     const SessionID = uuidv4();
 
-    await Session.insertOne({
+    await Session.create({
       UID: userDoc.UID,
       SessionID: SessionID,
     });
@@ -156,7 +156,7 @@ app.post("/UserCheck", async (req, res) => {
     });
   } catch (error) {
     console.error("Error in login:", error);
-    return res.status(500).json({ msg: "Internal Server Error" });
+    return res.status(500).json({ msg: error });
   }
 });
 
@@ -167,10 +167,6 @@ app.get("/getUserInfo" , async (req, res) => {
 
   const sessionId = req.cookies.SessionID;
 
-  if (!sessionId) {
-    return res.status(401).json({ error: "No session cookie found" });
-  }
-
   try {
     const session = await Session.findOne({ SessionID: sessionId });
 
@@ -178,7 +174,7 @@ app.get("/getUserInfo" , async (req, res) => {
       console.error("No Session ID found in DB")
       return res.status(401).json({ error: "Invalid or expired session" });
     }
-
+  
     const user = await User.findOne({ UID: session.UID }).select("Username Profession UID -_id");
 
     if (!user) {
@@ -198,7 +194,17 @@ app.get("/getUserInfo" , async (req, res) => {
 
 
 
+app.get("/aliveRoute" , async(req , res) => {
 
+  const SessionID = req.cookies.SessionID;
+
+  if (!SessionID) {
+    return res.status(401).json({message : "Un-authorized access , No Session ID"})
+  }
+
+  return res.status(200).json({message : "Session Exists , Route is Alive"})
+
+})
 
 
 // Product Routes - 
@@ -309,6 +315,7 @@ app.get("/get_pid" , getSessionInfo , async(req ,res) => {
   return res.status(200).json({P_id : nextPID});
 
 })
+
 
 
 app.delete("/delete_product", async (req, res) => {
@@ -514,17 +521,12 @@ app.get("/get_customer_stats" , getSessionInfo , async(req , res) => {
 //Overview Routes 
 app.get("/get_line_chart_info" , getSessionInfo , async(req , res) => {
 
- const UID = Number(req.userID);
-
-  const endDate = new Date(); // now
-  const startDate = new Date();
-  startDate.setDate(endDate.getDate() - 30); // 31 days ago
+  const UID = Number(req.userID);
 
   const result = await Income.aggregate([
     {
       $match: {
         UID: UID,
-        Created_at: { $gte: startDate, $lte: endDate } // last 30 days
       }
     },
     {
@@ -538,6 +540,7 @@ app.get("/get_line_chart_info" , getSessionInfo , async(req , res) => {
   res.status(200).json({ Details: result })
 
 })
+
 
 
 app.get("/getDataForPie" , getSessionInfo , async(req , res) => {
@@ -593,6 +596,7 @@ app.get("/get_low_stock_info" , getSessionInfo , async(req , res) => {
   res.status(200).json({details : result})
 
 })
+
 
 
 // Income Routes -
@@ -855,11 +859,12 @@ app.get("/get_overview_stats" , getSessionInfo , async(req , res) => {
 
   const endDate = new Date();
   const startDate = new Date();
-  startDate.setDate(endDate.getDate() - 2);
+  startDate.setDate(endDate.getDate() - 1);
 
   try {
-    const newCustomer = await Customer.countDocuments({"UID" : UID}).sort({"Created_at" : -1}).limit(1)
-    const InStock = await Product.countDocuments({"Product_quantity" : {$gt : 2} , UID})
+    const newCustomer = await Customer.countDocuments({UID : UID , Created_at : {$gt : startDate , $lt : endDate}})
+    const totalCustomer = await Customer.countDocuments({UID})
+    const TotalStockCount = await Product.countDocuments({UID})
 
     const totalIncomeAgg = await Income.aggregate([
       { $match: { UID } },
@@ -867,7 +872,8 @@ app.get("/get_overview_stats" , getSessionInfo , async(req , res) => {
     ]);
     const totalIncome = totalIncomeAgg[0]?.total || 0;
 
-    res.status(200).json({cusStats : newCustomer , product_stats1 : InStock  , Total_Income: totalIncome})
+    res.status(200).json({StockCount : TotalStockCount  , Total_Income: totalIncome , Total_Customer : totalCustomer , NewCustomerCount : newCustomer})
+
   }
 
   catch(error) {

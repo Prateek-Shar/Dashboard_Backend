@@ -1,9 +1,12 @@
 import Connect from "./Connect/db.js"
-import express from "express"
+import express, { json } from "express"
 import Customer from "../DB/schema/customers.js"
 import Product from "./schema/products.js"
 import Income from "./schema/income.js"
 import User from "./schema/users.js"
+// import user_info from "./schema/redis_info.js"
+import redis_connect from "../MiddleWare/redis_connect.js"
+import { client } from "../MiddleWare/redis_connect.js"
 import cors from "cors"
 import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid';
@@ -35,12 +38,13 @@ app.use(cookieParser());
 
 
 // Server Starts
-app.listen(PORT ,  async() => {
+app.listen(PORT , async() => {
 
   try {
     await Connect();
+    await redis_connect()
     // console.info(`Sever is ruuning on port ${PORT}`)
-    console.log(`Server is running on : http://localhost:${PORT}`)
+    // console.log(`Server is running on : http://localhost:${PORT}`)
   }
 
   catch(error) {
@@ -115,7 +119,7 @@ app.get("/getUserLength" , async(req , res) => {
 
 
 // Login Routes
-app.post("/UserCheck", async (req, res) => {
+app.post("/UserCheck" , async (req, res) => {
 
   try {
     // ✅ now you can safely check them
@@ -131,8 +135,10 @@ app.post("/UserCheck", async (req, res) => {
 
     const SessionID = uuidv4();
 
+    await client.set(SessionID , JSON.stringify({"UID" : userDoc.UID , "Username" : userDoc.Username , "Profession" : userDoc.Profession}) , {EX : 60 * 10})
+
     await Session.create({
-      UID: userDoc.UID,
+      // UID: userDoc.UID,
       SessionID: SessionID,
     });
 
@@ -147,12 +153,12 @@ app.post("/UserCheck", async (req, res) => {
     console.log("Login Successfull")
 
     return res.status(200).json({
-      message: "Login successful",
-      login_det: {
-        Username: userDoc.Username,
-        Profession: userDoc.Profession,
-        UID: userDoc.UID,
-      },
+      message: "Login successful"
+      // login_det: {
+      //   Username: userDoc.Username,
+      //   Profession: userDoc.Profession,
+      //   UID: userDoc.UID,
+      // },
     });
   } catch (error) {
     console.error("Error in login:", error);
@@ -161,6 +167,17 @@ app.post("/UserCheck", async (req, res) => {
 });
 
 
+app.get("/getInfo" , async(res , req) => {
+
+  const sessionId = req.cookie.SessionID;
+
+  if(!sessionId) {
+    return res.status(401).json({"message" : "No SessionID found"})
+  }
+
+  return res.status(200).json({"message" : "SessionID found"})
+})
+
 
 
 app.get("/getUserInfo" , async (req, res) => {
@@ -168,18 +185,20 @@ app.get("/getUserInfo" , async (req, res) => {
   const sessionId = req.cookies.SessionID;
 
   try {
-    const session = await Session.findOne({ SessionID: sessionId });
+    const session = await client.get(sessionId);
 
     if (!session) {
-      console.error("No Session ID found in DB")
+      console.error("No Session ID found in Redis DB")
       return res.status(401).json({ error: "Invalid or expired session" });
     }
   
-    const user = await User.findOne({ UID: session.UID }).select("Username Profession UID -_id");
+    // const user = await client.get(sessionId);
+    // console.log("Data from redis db : " , session);
+    const user = JSON.parse(session);
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    // if (!user) {
+    //   return res.status(404).json({ error: "User not found" });
+    // }
 
     return res.status(200).json({ login_det: user });
 
@@ -244,7 +263,12 @@ app.get("/get_products_length" , getSessionInfo , async(req , res) => {
 
 app.get("/product_stats" ,  getSessionInfo , async(req , res) => {
 
-  const UID = req.userID;
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
 
   try {
     const InStock = await Product.countDocuments({"Product_quantity" : {$gt : 2} , UID})
@@ -341,7 +365,12 @@ app.get("/get_product_statistics", getSessionInfo , async (req, res) => {
 
     const skip = (pageNumber - 1) * pageSize;
 
-    const UID = req.userID;
+    const sessionID = req.sessionInfo;
+
+    const data = await client.get(sessionID)
+    const parsed_data = JSON.parse(data)
+  
+    const UID = parsed_data.UID
 
     try {
         const response = await Product.find({ UID })
@@ -364,7 +393,13 @@ app.get("/get_product_statistics", getSessionInfo , async (req, res) => {
 // Customer Routes -
 app.get('/search_customer' , getSessionInfo , async (req, res) => {
     const { name } = req.query;
-    const UID = req.userID
+    const sessionID = req.sessionInfo;
+
+    const data = await client.get(sessionID)
+    const parsed_data = JSON.parse(data)
+
+    const UID = parsed_data.UID
+
 
     try {
         const customer = await Customer.find({ Customer_name : name , UID : UID }).select("-Date_created -_id -UserID -__v"); // Case-sensitive Exact Match
@@ -432,7 +467,12 @@ app.get("/get_customers" , getSessionInfo , async(req , res) => {
 
   const skip = (pageNumber - 1) * pageSize;
 
-  const UID = Number(req.userID); // <- convert to number!
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
 
   try {
       const response = await Customer.find({ "UID" : UID })
@@ -471,7 +511,13 @@ app.delete("/deleteCustomer" , getSessionInfo , async(req , res) => {
 
 
 app.get("/getDataAccToFilter" , getSessionInfo , async(req ,res) => {
-  const UID = Number(req.userID);
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
+
   const { value } = req.query;
 
   try {
@@ -504,7 +550,12 @@ app.get("/getDataAccToFilter" , getSessionInfo , async(req ,res) => {
 
 app.get("/get_customer_stats" , getSessionInfo , async(req , res) => {
 
-  const UID = Number(req.userID)
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
 
   const response1 = await Customer.countDocuments({"Status" : "Active" , UID})
   const response3 = await Customer.countDocuments({ "UID" : UID })
@@ -519,9 +570,63 @@ app.get("/get_customer_stats" , getSessionInfo , async(req , res) => {
 
 
 //Overview Routes 
+app.get("/get_overview_stats" , getSessionInfo , async(req , res) => {
+
+  // const sessionID = req.sessionInfo;
+  const sessionID = req.cookies.SessionID;
+
+  // console.log("SessionID : " , sessionID)
+  const data = await client.get(sessionID);
+
+  if (!data) {
+    return res.status(401).json({ msg: "Invalid or expired session" });
+  }
+
+  let parsed_data;
+  try {
+    parsed_data = JSON.parse(data);
+  } catch {
+    return res.status(500).json({ error: "Invalid session data" });
+  }
+
+  const UID = parsed_data?.UID;
+  if (UID == null || UID === "") {
+    return res.status(401).json({ msg: "UID unavailable" });
+  }
+
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(endDate.getDate() - 1);
+
+  try {
+    const newCustomer = await Customer.countDocuments({UID : UID , Created_at : {$gt : startDate , $lt : endDate}})
+    const totalCustomer = await Customer.countDocuments({UID})
+    const TotalStockCount = await Product.countDocuments({UID})
+
+    const totalIncomeAgg = await Income.aggregate([
+      { $match: { UID } },
+      { $group: { _id: null, total: { $sum: "$Amount" } } },
+    ]);
+    const totalIncome = totalIncomeAgg[0]?.total || 0;
+
+    res.status(200).json({StockCount : TotalStockCount  , Total_Income: totalIncome , Total_Customer : totalCustomer , NewCustomerCount : newCustomer})
+
+  }
+
+  catch(error) {
+    res.status(400).json({error : "Something broke on server side"}) 
+  }
+
+})  
+
 app.get("/get_line_chart_info" , getSessionInfo , async(req , res) => {
 
-  const UID = Number(req.userID);
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
 
   const result = await Income.aggregate([
     {
@@ -545,7 +650,12 @@ app.get("/get_line_chart_info" , getSessionInfo , async(req , res) => {
 
 app.get("/getDataForPie" , getSessionInfo , async(req , res) => {
 
-  const UID = Number(req.userID);
+  const sessionID = req.cookies.SessionID;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
 
   const endDate = new Date(); // now
   const startDate = new Date();
@@ -572,7 +682,12 @@ app.get("/getDataForPie" , getSessionInfo , async(req , res) => {
 
 app.get("/getLatestTransaction" , getSessionInfo , async(req , res) => {
 
-  const UID = Number(req.userID)
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
 
   try {
     const result = await Income.find({"UID" : UID}).select("-_id -UID -__v").sort({"Created_at" : -1}).limit(3)
@@ -589,7 +704,12 @@ app.get("/getLatestTransaction" , getSessionInfo , async(req , res) => {
 
 app.get("/get_low_stock_info" , getSessionInfo , async(req , res) => {
 
-  const UID = Number(req.userID)
+  const sessionID = req.cookies.SessionID;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
 
   const result = await Product.find({"Product_quantity" : {$lt : 5} , "UID" : UID}).select("-UID -P_id -Product_price -Product_catagory")
 
@@ -599,9 +719,15 @@ app.get("/get_low_stock_info" , getSessionInfo , async(req , res) => {
 
 
 
+
 // Income Routes -
 app.post("/send_income" , getSessionInfo ,  async(req , res) => {
-  const UID = Number(req.userID)
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
 
   const { Source , Amount , Catagory , Created_at } = req.body
 
@@ -623,7 +749,12 @@ app.get("/get_income_detail" , getSessionInfo , async(req , res) => {
 
   const skip = (pageNumber - 1) * pageSize;
 
-  const UID = Number(req.userID); // <- convert to number!
+  const sessionID = req.cookies.SessionID;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
 
   try {
       const response = await Income.find({UID})
@@ -642,7 +773,13 @@ app.get("/get_income_detail" , getSessionInfo , async(req , res) => {
 app.get("/get_income_length" , getSessionInfo , async(req ,res) => {
 
   try {
-    const UID = Number(req.userID)
+    const sessionID = req.sessionInfo;
+
+    const data = await client.get(sessionID)
+    const parsed_data = JSON.parse(data)
+
+    const UID = parsed_data.UID
+
 
     const incomelen = await Income.countDocuments({"UID" : UID})
     res.status(200).json({Income_stats : incomelen})
@@ -655,7 +792,13 @@ app.get("/get_income_length" , getSessionInfo , async(req ,res) => {
 
 
 app.get("/get_data_by_month", getSessionInfo, async (req, res) => {
-  const UID = Number(req.userID);
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
+
 
   // Start of current month
   const startOfMonth = new Date();
@@ -692,7 +835,12 @@ app.get("/get_data_by_month", getSessionInfo, async (req, res) => {
 
 
 app.get("/get_data_daily", getSessionInfo, async (req, res) => {
-  const UID = Number(req.userID);
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
 
   // Get start of today
   const start = new Date();
@@ -732,7 +880,13 @@ app.get("/get_data_daily", getSessionInfo, async (req, res) => {
 
 
 app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
-  const UID = Number(req.userID);
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
+
 
   const currentDate = new Date();
 
@@ -770,7 +924,13 @@ app.get("/get_data_by_year", getSessionInfo, async (req, res) => {
 
 
 app.get("/getIncomeStats", getSessionInfo, async (req, res) => {
-  const UID = Number(req.userID);
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
+
 
   try {
     const now = new Date();
@@ -852,51 +1012,26 @@ app.get("/getIncomeStats", getSessionInfo, async (req, res) => {
 });
 
 
-//Overview Routes -
-app.get("/get_overview_stats" , getSessionInfo , async(req , res) => {
-  
-  const UID = Number(req.userID)
-
-  const endDate = new Date();
-  const startDate = new Date();
-  startDate.setDate(endDate.getDate() - 1);
-
-  try {
-    const newCustomer = await Customer.countDocuments({UID : UID , Created_at : {$gt : startDate , $lt : endDate}})
-    const totalCustomer = await Customer.countDocuments({UID})
-    const TotalStockCount = await Product.countDocuments({UID})
-
-    const totalIncomeAgg = await Income.aggregate([
-      { $match: { UID } },
-      { $group: { _id: null, total: { $sum: "$Amount" } } },
-    ]);
-    const totalIncome = totalIncomeAgg[0]?.total || 0;
-
-    res.status(200).json({StockCount : TotalStockCount  , Total_Income: totalIncome , Total_Customer : totalCustomer , NewCustomerCount : newCustomer})
-
-  }
-
-  catch(error) {
-    res.status(400).json({error : "Something broke on server side"}) 
-  }
-
-})  
-
-
-
-
 
 // Logout Route -
-app.get("/logout", (req, res) => {
+app.get("/logout", async(req, res) => {
+
+  const sessionID = req.cookies.SessionID;
+
+  if(!sessionID) {
+    return res.status(401).json({msg : "SessionID not found"})
+  }
+
+  await client.del(sessionID);
 
   res.clearCookie("SessionID", {
     secure: true,
-    sameSite: "None",
+    sameSite: "none",
   });
 
   return res.status(200).json({ message: "Logged out" });
+  
 });
-
 
 
 
@@ -909,13 +1044,3 @@ app.get("/edit_product" , async(req , res) => {
   res.status(200).json({edit_product : response})
   res.sendFile(__dirname , "../Pages" , "NewProduct.tsx")
 })
-
-
-
-
-
-
-
-
-
-

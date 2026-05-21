@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
     UID : {type : Number , required : true},

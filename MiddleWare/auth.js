@@ -1,6 +1,7 @@
 import Session from "../DB/schema/session.js";
 
 const getSessionInfo = async(req , res , next) => {
+    
     const session_id = req.cookies.SessionID;
 
     if (!session_id) {
@@ -13,7 +14,7 @@ const getSessionInfo = async(req , res , next) => {
         return res.status(401).json({message : "No Session Exists"})
     }
 
-    req.userID = session_exists.UID
+    req.sessionInfo = session_exists.SessionID
     next()
 }
 

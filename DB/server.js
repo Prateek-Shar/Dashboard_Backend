@@ -167,16 +167,19 @@ app.post("/UserCheck" , async (req, res) => {
 });
 
 
-app.get("/getInfo" , async(res , req) => {
+  app.get("/getInfo" , getSessionInfo , async(req , res) => {
 
-  const sessionId = req.cookie.SessionID;
+    const sessionID = req.sessionInfo;
+    // console.log("SessionID : " , sessionID)
 
-  if(!sessionId) {
-    return res.status(401).json({"message" : "No SessionID found"})
-  }
+    const check = await client.get(sessionID)
 
-  return res.status(200).json({"message" : "SessionID found"})
-})
+    if(!check) {
+      return res.status(401).json({"message" : "No SessionID found in redis db"})
+    }
+
+    return res.status(200).json({"message" : "SessionID found"})
+  })
 
 
 
@@ -264,6 +267,7 @@ app.get("/get_products_length" , getSessionInfo , async(req , res) => {
 app.get("/product_stats" ,  getSessionInfo , async(req , res) => {
 
   const sessionID = req.sessionInfo;
+  // console.log(sessionID)
 
   const data = await client.get(sessionID)
   const parsed_data = JSON.parse(data)
@@ -1030,7 +1034,7 @@ app.get("/logout", async(req, res) => {
   });
 
   return res.status(200).json({ message: "Logged out" });
-  
+
 });
 
 

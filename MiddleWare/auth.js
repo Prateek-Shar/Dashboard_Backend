@@ -14,6 +14,8 @@ const getSessionInfo = async(req , res , next) => {
         return res.status(401).json({message : "No Session Exists"})
     }
 
+    // console.log(session_exists.SessionID)
+
     req.sessionInfo = session_exists.SessionID
     next()
 }

@@ -495,7 +495,15 @@ app.get("/get_customers" , getSessionInfo , async(req , res) => {
 app.delete("/deleteCustomer" , getSessionInfo , async(req , res) => {
 
   const { email } = req.query;
-  const UID = Number(req.userID)
+  console.log("Email : " , email)
+
+  const sessionID = req.sessionInfo;
+
+  const data = await client.get(sessionID)
+  const parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID
+  console.log("UID : " , UID)
 
   if(!email) {
     return res.status(401).json({error : "Bad Request or invalid parameters"})

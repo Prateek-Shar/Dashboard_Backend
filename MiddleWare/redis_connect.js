@@ -4,17 +4,17 @@ import dotenv from "dotenv"
 dotenv.config()
 
 const pass = process.env.REDIS_URI
+const hostName = process.env.REDIS_HOSTNAME
 
 // To connect to Redis cloud
 export const client = createClient({
     username: 'default',
     password: pass,
     socket: {
-        host: 'redis-10151.c84.us-east-1-2.ec2.cloud.redislabs.com',
-        port: 10151
+        host: hostName,
+        port: 16615
     }
 });
-
 
 // To connect locally
 // export const client = createClient({

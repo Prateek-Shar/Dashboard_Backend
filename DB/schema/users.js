@@ -2,11 +2,13 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
     UID : { type : Number , required : true },
+    First_name : {type : String , required : true},
+    Last_name : {type : String , required : true},
     Username: { type : String, required: true},
     Email: { type : String, required: true },
     Password: { type : String, required: true },
     Profession: { type : String, required: true },  
-    CreatedAt: { type : String}
+    CreatedAt: { type : String }
 })
 
 

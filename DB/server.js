@@ -6,6 +6,7 @@ import Income from "./schema/income.js"
 import User from "./schema/users.js"
 // import user_info from "./schema/redis_info.js"
 import redis_connect from "../MiddleWare/redis_connect.js"
+import Task from "./schema/task.js"
 import { client } from "../MiddleWare/redis_connect.js"
 import cors from "cors"
 import cookieParser from 'cookie-parser';
@@ -19,8 +20,9 @@ const app = express()
 // Cors 
 const allowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
   "https://insightboard.vercel.app",
-];
+]
 
 app.use(cors({
   origin: allowedOrigins,
@@ -54,16 +56,85 @@ app.listen(PORT , async() => {
 })
 
 
+app.post("/dummydata" , async(req , res) => {
+  const dummy = [
+      {
+        Project_name: "Recipe Tales",
+        Task_id: "TASK-001",
+        Task_desc: "Design the recipe listing page",
+        Task_status: "COMPLETED",
+        Progress: 100,
+        Start_date: "2026-08-01",
+        End_date: "2026-08-05",
+        Duration: 4
+    },
+    {
+        Project_name: "Recipe Tales",
+        Task_id: "TASK-002",
+        Task_desc: "Implement recipe search functionality",
+        Task_status: "IN_PROGRESS",
+        Progress: 65,
+        Start_date: "2026-08-05",
+        End_date: "2026-08-15",
+        Duration: 10
+    },
+    {
+        Project_name: "Recipe Tales",
+        Task_id: "TASK-003",
+        Task_desc: "Build recipe rating system",
+        Task_status: "IN_PROGRESS",
+        Progress: 40,
+        Start_date: "2026-08-10",
+        End_date: "2026-08-20",
+        Duration: 10
+    },
+  ]
+
+  try {
+    const response = await Task.insertMany(dummy)
+
+    if(!response) {
+      return res.status(401).json({"message" : "Data not sent to DB"})
+    }
+
+    return res.status(200).json({"message" : "Data sent to db"})
+  }
+
+  catch(error) {
+    console.error("Error from Backend : " , error)
+  }
+
+
+})
+
+// Task route
+app.get("/task_details" , async(req, res) => {
+  try {
+    const det = await Task.find().limit(3).select("-Start_date -End_date -Project_name -Task_id -__v")
+    // console.info("Response from db : " , det)
+
+    if(!det) {
+      return res.status(401).json({"message" : "Data not recieved from db"})
+    }
+
+    return res.status(200).json({"message" : "Data recieved" , result : det})
+  }
+
+  catch(error) {
+    console.error("Error from backkend : " , error)
+  }
+})
+
 
 
 // Signup Routes -
 app.post("/newUser", async (req, res) => {
 
-  const { Username, Email, Password, Profession } = req.body;
+  const { Username, Email, Password, Profession , First_name , Last_name } = req.body;
 
   try {
 
-    if (!Username || !Email || !Password || !Profession) {
+    if (!Username || !Email || !Password || !Profession || !First_name || !Last_name) {
       return res.status(400).json({err_msg : "Missing Fields"})
     }
 
@@ -90,6 +161,8 @@ app.post("/newUser", async (req, res) => {
       Email,
       Password,
       Profession,
+      First_name,
+      Last_name,
       Date_created: new Date()
     });
 
@@ -127,15 +200,16 @@ app.post("/UserCheck" , async (req, res) => {
       return res.status(400).json({ msg: "Missing Fields" });
     }
 
-    const userDoc = await User.findOne({ "Username" : req.body.Username, "Password" : req.body.Password });
+    const userDoc = await User.findOne({ "Username" : req.body.Username, "Password" : req.body.Password});
 
     if (!userDoc) {
       return res.status(404).json({ msg: "Invalid Username or Password" });
     }
 
+
     const SessionID = uuidv4();
 
-    await client.set(SessionID , JSON.stringify({"UID" : userDoc.UID , "Username" : userDoc.Username , "Profession" : userDoc.Profession}) , {EX : 60 * 10})
+    await client.set(SessionID , JSON.stringify({"UID" : userDoc.UID , "Username" : userDoc.Username , "First_name" : userDoc.First_name , "Last_name" : userDoc.Last_name}) , {EX : 60 * 10})
 
     await Session.create({
       // UID: userDoc.UID,
@@ -189,6 +263,7 @@ app.get("/getUserInfo" , async (req, res) => {
 
   try {
     const session = await client.get(sessionId);
+    // console.log("Session data : " , session)
 
     if (!session) {
       console.error("No Session ID found in Redis DB")
@@ -198,6 +273,7 @@ app.get("/getUserInfo" , async (req, res) => {
     // const user = await client.get(sessionId);
     // console.log("Data from redis db : " , session);
     const user = JSON.parse(session);
+    console.log("Session data : " , user)
 
     // if (!user) {
     //   return res.status(404).json({ error: "User not found" });

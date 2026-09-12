@@ -13,6 +13,8 @@ import cookieParser from 'cookie-parser';
 import { v4 as uuidv4 } from 'uuid';
 import getSessionInfo from "../MiddleWare/auth.js"
 import Session from "./schema/session.js"
+import { v6 as uuidv6 } from "uuid"
+import crypto from "crypto"
 
 
 const app = express()
@@ -28,6 +30,12 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
+
+app.use((req , res , next) => {
+  console.info(`Request Receved : Method : ${req.method} , URL : ${req.originalUrl}`)
+  console.info(`Origin : ${req.headers.origin}`)  
+  next()
+})
 
 
 const PORT = process.env.PORT || 8080;
@@ -45,7 +53,6 @@ app.listen(PORT , async() => {
   try {
     await Connect();
     await redis_connect()
-    // console.info(`Sever is ruuning on port ${PORT}`)
     // console.log(`Server is running on : http://localhost:${PORT}`)
   }
 
@@ -108,10 +115,23 @@ app.post("/dummydata" , async(req , res) => {
 })
 
 // Task route
-app.get("/task_details" , async(req, res) => {
+app.get("/task_details" , getSessionInfo , async(req, res) => {
+
+  const sessionID = req.cookies.SessionID;
+
+  const data = await client.get(sessionID)
+  let parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID;
+  console.log("UID : " , UID)
+
+  if(!UID) {
+    return res.status(401).json({msg : "UID not available"})
+  }
+
   try {
-    const det = await Task.find().limit(3).select("-Start_date -End_date -Project_name -Task_id -__v")
-    // console.info("Response from db : " , det)
+    const det = await Task.find({UID}).select("-Start_date -Project_name -__v")
+    console.info("Response from db : " , det)
 
     if(!det) {
       return res.status(401).json({"message" : "Data not recieved from db"})
@@ -126,11 +146,161 @@ app.get("/task_details" , async(req, res) => {
 })
 
 
+app.get("/get_task_info/:id" , async(req , res) => {
+  try {
+    const {id} = req.params
+    console.log("ID : " , id)
+    console.log("Request from frontend : " , req.body)
+
+    if(!id) {
+      return res.status(401).json({"message" : "ID is required"})
+    }
+
+    const task = await Task.findOne({"Task_id" : id}).select("-_id -__v -Start_date -End_date -Task_id")
+
+    if(!task) {
+      return res.status(401).json({"message" : "Task not found"})
+    }
+
+    return res.status(200).json({"message" : "Task info" , result : task})
+  }
+  catch(error) {
+    console.error("Error from backend : " , error)
+  }
+})
+
+
+app.get("/getTaskStats"  , getSessionInfo , async(req , res) => {
+
+  const sessionID = req.cookies.SessionID;
+
+  const data = await client.get(sessionID)
+  let parsed_data = JSON.parse(data)
+
+  const UID = parsed_data.UID;
+
+  if(!UID) {
+    return res.status(401).json({msg : "UID not available"})
+  }
+
+  try {
+    const Completed_count = await Task.countDocuments({"Task_status" : "Completed" , "UID" : UID})
+    const Tracked_count = await Task.countDocuments({"UID" : UID})
+
+    if(!Completed_count && !Tracked_count) {
+      return res.status(401).json({msg : "Not able to fetch data from db" })
+    }
+
+    return res.status(200).json({Completed_count : Completed_count ,Tracked_count : Tracked_count})
+  }
+
+  catch(error) {
+    console.error("Error from backend : " , error)
+  }
+})
+
+
+app.put("/edit_task" , async(req , res) => {
+  try {
+    const {id} = req.query
+    const form = req.body   
+    
+    console.log("ID : " , id)
+    console.log("Form : " , form)
+
+    if(!id) {
+      return res.status(401).json({"message" : "ID is required"})
+    }
+
+    const task = await Task.findOneAndUpdate({"Task_id" : id}, form, {new : true})
+    console.log("Task : " , task)
+    return res.status(200).json({"message" : "Task modified" , result : task})
+  }
+  catch(error) {
+    console.error("Error from backend : " , error)
+  }
+})
+
+
+app.post("/newTask" , getSessionInfo , async (req , res) => {
+
+  const { Project_name , Task_desc , Task_status , End , Progress , Start , Task_id } = req.body
+
+  // console.log(req.body)  
+  const session_id = req.cookies.SessionID;
+
+  const data = await client.get(session_id);
+  const UID = JSON.parse(data).UID
+
+  // console.log("UID : " , UID)
+
+  if(!UID) {
+    return res.status(401).json({msg : "UID not found"})
+  }
+
+  const format_start_date = new Date(Start)
+  format_start_date.toISOString()
+
+  // console.log(format_start_date);
+
+  const curr_date = new Date();
+  const end = new Date(curr_date);
+  end.setDate(curr_date.getDate() + 10);
+
+  const formatted_end_date = end.toISOString()
+
+  const u_id = uuidv6()
+
+  if(!Project_name || !Task_desc || !Task_status || !Progress) {
+    return res.status(401).json({msg : "Missing Fields"})
+  }
+  
+  const detail = Task.create({
+    "UID" : UID,
+    "Project_name" : Project_name,
+    "Task_desc" : Task_desc,
+    "Task_status" : Task_status,
+    "Progress" : Progress,
+    "End_date" : formatted_end_date, 
+    "Task_id" : u_id,
+    "Start_date" : Start
+  })
+
+  if(!detail) {
+    return res.status(401).json({"error" : "Something went wrong while inserting data to db"})
+  }
+
+  return res.status(200).json({"msg" : "Data Stored Successfully"})
+
+})
+
+
+app.get("/getDataForChart" , async(req , res) => {
+
+  const {start , end} = req.query;
+
+  const toDate = new Date(end)
+  const fromDate = new Date(start)
+
+  console.log("From : " , fromDate)
+  console.log("To : " , toDate)
+
+  if(!start || !end) {
+    return res.status(404).json({msg : "Dates not recieved"})
+  }
+
+  const da = Task.find({"Start_date" : {$gte : fromDate , $lte : toDate}}) 
+  console.log(da)
+})
+
+
 
 // Signup Routes -
 app.post("/newUser", async (req, res) => {
 
   const { Username, Email, Password, Profession , First_name , Last_name } = req.body;
+
+  console.log("Password : " , Password)
 
   try {
 
@@ -146,6 +316,7 @@ app.post("/newUser", async (req, res) => {
       });
     }
 
+
     const users = await User.find().sort({"UID" : 1}).select("UID");
     let UID = 1;  
 
@@ -154,16 +325,17 @@ app.post("/newUser", async (req, res) => {
       UID++;
     }
 
+    const pass = crypto.createHash("sha256").update(Password).digest("base64")
 
     const newUser = await User.create({
       "UID" : UID ,
-      Username,
-      Email,
-      Password,
-      Profession,
-      First_name,
-      Last_name,
-      Date_created: new Date()
+      "Username" : Username,
+      "Email" : Email,
+      "Password" : pass,
+      "Profession" : Profession,
+      "First_name" : First_name,
+      "Last_name" : Last_name,
+      "Date_created" : new Date()
     });
 
     return res.status(201).json({ user: newUser , login_success : "User created successfully"});
@@ -190,25 +362,29 @@ app.get("/getUserLength" , async(req , res) => {
 
 
 
-
 // Login Routes
-app.post("/UserCheck" , async (req, res) => {
+app.post("/UserCheck" , async (req , res) => {
+
+  const SessionID = uuidv4();
 
   try {
-    // ✅ now you can safely check them
+
+    console.log("1. Recieved data from frontend")
     if (!req.body.Username || !req.body.Password) {
       return res.status(400).json({ msg: "Missing Fields" });
     }
 
-    const userDoc = await User.findOne({ "Username" : req.body.Username, "Password" : req.body.Password});
+    console.log("2. Before User.findOne()");
+
+    const hashed_pass = crypto.createHash("sha256").update(req.body.Password).digest("base64")
+
+    const userDoc = await User.findOne({ "Username" : req.body.Username, "Password" : hashed_pass});
 
     if (!userDoc) {
       return res.status(404).json({ msg: "Invalid Username or Password" });
     }
 
-
-    const SessionID = uuidv4();
-
+    console.log("3. Settng the session id to redis db")
     await client.set(SessionID , JSON.stringify({"UID" : userDoc.UID , "Username" : userDoc.Username , "First_name" : userDoc.First_name , "Last_name" : userDoc.Last_name}) , {EX : 60 * 10})
 
     await Session.create({
@@ -216,6 +392,9 @@ app.post("/UserCheck" , async (req, res) => {
       SessionID: SessionID,
     });
 
+    console.log("Sessiion id : " , SessionID)
+
+    console.log("5. Setting Cookie")
     res.cookie("SessionID", SessionID, {
       maxAge: 10 * 60 * 1000,
       secure: true,
@@ -234,10 +413,14 @@ app.post("/UserCheck" , async (req, res) => {
       //   UID: userDoc.UID,
       // },
     });
-  } catch (error) {
+
+  } 
+  
+  catch (error) {
     console.error("Error in login:", error);
-    return res.status(500).json({ msg: error });
+    return res.status(500).json({ error: error });
   }
+
 });
 
 
@@ -273,7 +456,6 @@ app.get("/getUserInfo" , async (req, res) => {
     // const user = await client.get(sessionId);
     // console.log("Data from redis db : " , session);
     const user = JSON.parse(session);
-    console.log("Session data : " , user)
 
     // if (!user) {
     //   return res.status(404).json({ error: "User not found" });
@@ -600,6 +782,7 @@ app.delete("/deleteCustomer" , getSessionInfo , async(req , res) => {
 
 app.get("/getDataAccToFilter" , getSessionInfo , async(req ,res) => {
   const sessionID = req.sessionInfo;
+  console.log("Session : " , sessionID)
 
   const data = await client.get(sessionID)
   const parsed_data = JSON.parse(data)
@@ -630,8 +813,6 @@ app.get("/getDataAccToFilter" , getSessionInfo , async(req ,res) => {
   catch(error) {
     console.error("Something Broke Up on Backend")
   }
-
-
 })
 
  
@@ -664,7 +845,7 @@ app.get("/get_overview_stats" , getSessionInfo , async(req , res) => {
   const sessionID = req.cookies.SessionID;
 
   // console.log("SessionID : " , sessionID)
-  const data = await client.get(sessionID);
+  const data = await client.get(sessionID); 
 
   if (!data) {
     return res.status(401).json({ msg: "Invalid or expired session" });

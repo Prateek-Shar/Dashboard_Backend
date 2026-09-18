@@ -32,8 +32,8 @@ app.use(cors({
 }));
 
 app.use((req , res , next) => {
-  console.info(`Request Receved : Method : ${req.method} , URL : ${req.originalUrl}`)
-  console.info(`Origin : ${req.headers.origin}`)  
+  console.info(`Request Receved - Method : ${req.method} , URL : ${req.originalUrl}`)
+  // console.info(`Origin : ${req.headers.origin}`)  
   next()
 })
 
@@ -113,6 +113,110 @@ app.post("/dummydata" , async(req , res) => {
 
 
 })
+
+// Delete Account 
+app.delete("/deleteAcc" , getSessionInfo , async(req , res) => {
+  
+  try {
+
+    const session_id = req.cookies.SessionID
+
+    const raw_uid = await client.get(session_id)
+
+    const UID = JSON.parse(raw_uid).UID
+
+    if(!UID) {
+      return res.status(401).json({msg : "UID Not Found"})
+    }
+
+    const deleteTask = await Task.deleteMany({"UID" : UID})
+    const deleteCustomer = await Customer.deleteMany({"UID" : UID})
+    const deleteProducts = await Product.deleteMany({"UID" : UID})
+    const deleteIncome = await Income.deleteMany({"UID" : UID})
+
+    const deleteUser = await User.deleteOne({"UID" : UID})
+
+    const deleteCookie = req.clearCookie(session_id)
+    
+    const deleteSession = await client.del(session_id)
+
+    if (!deleteTask || !deleteIncome || !deleteCustomer || !deleteProducts || !deleteUser) {
+      return res.status(404).json({msg : "Unable to perform the operations"})
+    }
+
+    if (!deleteCookie || deleteSession) {
+      return res.status(401).json({msg : "Not able to delete cookie and session"})
+    }
+
+    return res.status(200).json({msg : "User Deleted Successfully"})
+  }
+
+  catch(err) {
+    console.log("Error from backend : " , err)
+    return res.status(500).json({error : err})
+  }
+
+})
+
+// Reset Route
+app.get("/verify_user" , async(req , res) => {
+
+  try {
+    const { search } = req.query;
+
+    if(!search) {
+      return res.status(404).json({msg : "Missing Fields"})
+    }
+
+    const data = await User.findOne({"Username" : search})
+
+    return res.status(200).json({msg : "Success" , data})
+  }
+
+  catch(err) {
+    console.error("Error from backend : " , err)
+  }
+})
+
+
+app.put("/changePass" , async(req , res) => {
+  const { search } = req.query
+  const { Password , Confirm_password } = req.body
+
+  const encrypted_pass = crypto.createHash("sha256").update(Password).digest("base64")
+  const encrypted_confirm_pass = crypto.createHash("sha256").update(Confirm_password).digest("base64") 
+
+  try {
+   
+
+    if(!search) {
+      return res.status(401).json({err : "Didn't recieve query"})
+    }
+
+    if(!Password || !Confirm_password) {
+      return res.status(401).json({msg : "Missing Fields"})
+    }
+
+    if(encrypted_pass != encrypted_confirm_pass) {
+      return res.status(401).json({msg : "Passwords do not match"})
+    }
+
+    const data = await User.findOneAndUpdate({"Username" : search} , {$set : {"Password" : encrypted_pass}} , {new : true})
+
+    if(!data) {
+      return res.status(401).json({result : "Not able to update pass"})
+    }
+
+    return res.status(200).json({result : "Password Changed"})
+  } 
+
+  catch(err) {
+    console.error("Error from backend : " , err)
+  }
+})
+
+
+
 
 // Task route
 app.get("/task_details" , getSessionInfo , async(req, res) => {
@@ -418,7 +522,7 @@ app.post("/UserCheck" , async (req , res) => {
   
   catch (error) {
     console.error("Error in login:", error);
-    return res.status(500).json({ error: error });
+    return res.status(500).json({ err : error });
   }
 
 });

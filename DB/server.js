@@ -168,9 +168,13 @@ app.get("/verify_user" , async(req , res) => {
       return res.status(404).json({msg : "Missing Fields"})
     }
 
-    const data = await User.findOne({"Username" : search})
+    const user = await User.findOne({"Username" : search})
 
-    return res.status(200).json({msg : "Success" , data})
+    if(!user) {
+      return res.status(404).json({msg : "User Not Found"})
+    }
+
+    return res.status(200).json({msg : "Success"})
   }
 
   catch(err) {

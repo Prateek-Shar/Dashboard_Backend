@@ -164,6 +164,8 @@ app.get("/verify_user" , async(req , res) => {
   try {
     const { search } = req.query;
 
+    console.log("Query : " , req.query)
+
     if(!search) {
       return res.status(404).json({msg : "Missing Fields"})
     }

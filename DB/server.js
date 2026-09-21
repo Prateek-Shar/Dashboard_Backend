@@ -115,14 +115,17 @@ app.post("/dummydata" , async(req , res) => {
 })
 
 // Delete Account 
-app.delete("/deleteAcc" , getSessionInfo , async(req , res) => {
+app.delete("/deleteAcc" , async(req , res) => {
   
   try {
 
+    console.log("Getting session id from console")
     const session_id = req.cookies.SessionID
 
+    console.log("Getting details from redis")
     const raw_uid = await client.get(session_id)
 
+    console.log("Parsing UID")
     const UID = JSON.parse(raw_uid).UID
 
     if(!UID) {
@@ -136,7 +139,12 @@ app.delete("/deleteAcc" , getSessionInfo , async(req , res) => {
 
     const deleteUser = await User.deleteOne({"UID" : UID})
 
-    const deleteCookie = req.clearCookie(session_id)
+    const deleteCookie = res.clearCookie("SessionID" , {
+      secure : true,
+      httpOnly : true,
+      sameSite : "none",
+      path : "/"
+    })
     
     const deleteSession = await client.del(session_id)
 
@@ -144,8 +152,8 @@ app.delete("/deleteAcc" , getSessionInfo , async(req , res) => {
       return res.status(404).json({msg : "Unable to perform the operations"})
     }
 
-    if (!deleteCookie || deleteSession) {
-      return res.status(401).json({msg : "Not able to delete cookie and session"})
+    if (deleteSession) {
+      return res.status(401).json({msg : "Not able to delete session"})
     }
 
     return res.status(200).json({msg : "User Deleted Successfully"})

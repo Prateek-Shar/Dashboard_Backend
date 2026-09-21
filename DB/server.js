@@ -148,11 +148,15 @@ app.delete("/deleteAcc" , async(req , res) => {
     
     const deleteSession = await client.del(session_id)
 
+    if(deleteSession == 0) {
+      return res.status(401).json({msg : "Unable to Delete Session"})
+    }
+
     if (!deleteTask || !deleteIncome || !deleteCustomer || !deleteProducts || !deleteUser) {
       return res.status(404).json({msg : "Unable to perform the operations"})
     }
 
-    if (deleteSession) {
+    if (!deleteSession) {
       return res.status(401).json({msg : "Not able to delete session"})
     }
 

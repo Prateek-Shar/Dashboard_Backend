@@ -119,13 +119,13 @@ app.delete("/deleteAcc" , async(req , res) => {
   
   try {
 
-    console.log("Getting session id from console")
+    // console.log("Getting session id from console")
     const session_id = req.cookies.SessionID
 
-    console.log("Getting details from redis")
+    // console.log("Getting details from redis")
     const raw_uid = await client.get(session_id)
 
-    console.log("Parsing UID")
+    // console.log("Parsing UID")
     const UID = JSON.parse(raw_uid).UID
 
     if(!UID) {
@@ -245,7 +245,7 @@ app.get("/task_details" , getSessionInfo , async(req, res) => {
   let parsed_data = JSON.parse(data)
 
   const UID = parsed_data.UID;
-  console.log("UID : " , UID)
+  // console.log("UID : " , UID)
 
   if(!UID) {
     return res.status(401).json({msg : "UID not available"})
@@ -253,7 +253,7 @@ app.get("/task_details" , getSessionInfo , async(req, res) => {
 
   try {
     const det = await Task.find({UID}).select("-Start_date -Project_name -__v")
-    console.info("Response from db : " , det)
+    // console.info("Response from db : " , det)
 
     if(!det) {
       return res.status(401).json({"message" : "Data not recieved from db"})
@@ -275,7 +275,7 @@ app.get("/get_task_info/:id" , async(req , res) => {
     console.log("Request from frontend : " , req.body)
 
     if(!id) {
-      return res.status(401).json({"message" : "ID is required"})
+      return res.status(401).json({"message" : "ID is required"}) 
     }
 
     const task = await Task.findOne({"Task_id" : id}).select("-_id -__v -Start_date -End_date -Task_id")
@@ -292,32 +292,41 @@ app.get("/get_task_info/:id" , async(req , res) => {
 })
 
 
-app.get("/getTaskStats"  , getSessionInfo , async(req , res) => {
+app.get("/getTaskStats" , getSessionInfo , async(req , res) => {
 
   const sessionID = req.cookies.SessionID;
 
   const data = await client.get(sessionID)
-  let parsed_data = JSON.parse(data)
+  const parsed_data = JSON.parse(data)
 
   const UID = parsed_data.UID;
 
+  console.log("Session ID:", sessionID);
+  console.log("Redis data:", req.sessionInfo);
+
+  console.log("UID : " , UID)
+
   if(!UID) {
-    return res.status(401).json({msg : "UID not available"})
+    return res.status(404).json({msg : "UID not available"})
   }
 
   try {
     const Completed_count = await Task.countDocuments({"Task_status" : "Completed" , "UID" : UID})
     const Tracked_count = await Task.countDocuments({"UID" : UID})
 
-    if(!Completed_count && !Tracked_count) {
-      return res.status(401).json({msg : "Not able to fetch data from db" })
-    }
+    console.log("Completed count : " , Completed_count)
+    console.log("Tracked count : " , Tracked_count)
+
+    // if(!Completed_count && !Tracked_count) {
+    //   return res.status(404).json({msg : "Not able to fetch data from db" })
+    // }
 
     return res.status(200).json({Completed_count : Completed_count ,Tracked_count : Tracked_count})
   }
 
   catch(error) {
     console.error("Error from backend : " , error)
+    return res.status(500).json({err : error})
   }
 })
 
